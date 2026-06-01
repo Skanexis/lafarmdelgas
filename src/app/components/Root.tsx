@@ -6,6 +6,7 @@ export default function Root() {
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = location.pathname === '/';
+  const isAdmin = location.pathname.startsWith('/admin');
 
   return (
     <div
@@ -17,7 +18,7 @@ export default function Root() {
       }}
     >
       {/* Floating Nav */}
-      {!isHome && (
+      {!isHome && !isAdmin && (
         <nav
           className="app-nav"
           style={{
@@ -90,7 +91,7 @@ export default function Root() {
         </nav>
       )}
 
-      <div style={{ paddingTop: isHome ? 0 : '73px' }}>
+      <div style={{ paddingTop: isHome || isAdmin ? 0 : '73px' }}>
         <Outlet />
       </div>
 
