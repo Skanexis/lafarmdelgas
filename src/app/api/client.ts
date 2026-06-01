@@ -29,14 +29,17 @@ export interface MediaItem {
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const isFormData = options?.body instanceof FormData;
+  const method = (options?.method || 'GET').toUpperCase();
+  const requestPath = method === 'GET' ? `${path}${path.includes('?') ? '&' : '?'}_=${Date.now()}` : path;
   const headers = {
     ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...options?.headers,
   };
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers,
+  const response = await fetch(`${API_BASE_URL}${requestPath}`, {
     ...options,
+    cache: 'no-store',
+    headers,
   });
 
   if (!response.ok) {

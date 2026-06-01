@@ -595,6 +595,8 @@ export default function AdminPage() {
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [editingCategoryName, setEditingCategoryName] = useState('');
   const [loadingProducts, setLoadingProducts] = useState(false);
+  const [adminLoadError, setAdminLoadError] = useState('');
+  const [adminReloadKey, setAdminReloadKey] = useState(0);
   const [savingProduct, setSavingProduct] = useState(false);
   const [savingCategory, setSavingCategory] = useState(false);
   const [savingContacts, setSavingContacts] = useState(false);
@@ -602,26 +604,81 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!adminToken) return;
+    let active = true;
 
-    setLoadingProducts(true);
-    verifyAdminSession(adminToken)
-      .then(() =>
-        Promise.all([fetchProducts(), fetchCategories(), fetchSettings(), fetchContacts(), fetchAdminMedia(adminToken)]),
-      )
-      .then(([apiProducts, apiCategories, apiSettings, apiContacts, apiMedia]) => {
-        setProductList(apiProducts);
-        setCategoryList(apiCategories);
-        setSettings(apiSettings);
-        setContacts(apiContacts);
-        setMediaList(apiMedia);
-      })
-      .catch(() => {
+    async function loadAdminData() {
+      setLoadingProducts(true);
+      setAdminLoadError('');
+
+      try {
+        await verifyAdminSession(adminToken);
+      } catch {
+        if (!active) return;
         sessionStorage.removeItem('laFarmAdminToken');
         setAdminToken('');
         toast.error('Sessione admin non valida');
-      })
-      .finally(() => setLoadingProducts(false));
-  }, [adminToken]);
+        setLoadingProducts(false);
+        return;
+      }
+
+      const results = await Promise.allSettled([
+        fetchProducts(),
+        fetchCategories(),
+        fetchSettings(),
+        fetchContacts(),
+        fetchAdminMedia(adminToken),
+      ]);
+
+      if (!active) return;
+
+      const [productsResult, categoriesResult, settingsResult, contactsResult, mediaResult] = results;
+      const failed: string[] = [];
+
+      if (productsResult.status === 'fulfilled') {
+        setProductList(productsResult.value);
+      } else {
+        failed.push('prodotti');
+      }
+
+      if (categoriesResult.status === 'fulfilled') {
+        setCategoryList(categoriesResult.value);
+      } else {
+        failed.push('categorie');
+      }
+
+      if (settingsResult.status === 'fulfilled') {
+        setSettings(settingsResult.value);
+      } else {
+        failed.push('brand');
+      }
+
+      if (contactsResult.status === 'fulfilled') {
+        setContacts(contactsResult.value);
+      } else {
+        failed.push('contatti');
+      }
+
+      if (mediaResult.status === 'fulfilled') {
+        setMediaList(mediaResult.value);
+      } else {
+        failed.push('media');
+      }
+
+      if (failed.length) {
+        const message = `Errore caricamento: ${failed.join(', ')}`;
+        setAdminLoadError(message);
+        toast.error(message);
+      }
+
+      setLoadingProducts(false);
+    }
+
+    loadAdminData();
+
+    return () => {
+      active = false;
+    };
+  }, [adminToken, adminReloadKey]);
 
   if (!adminToken) {
     return (
@@ -875,6 +932,42 @@ export default function AdminPage() {
 
         {/* Main content */}
         <div className="admin-main" style={{ flex: 1, padding: '28px', overflow: 'auto' }}>
+          {adminLoadError && (
+            <div
+              style={{
+                marginBottom: '18px',
+                padding: '13px 14px',
+                borderRadius: '8px',
+                border: '1px solid rgba(255,150,120,0.32)',
+                background: 'rgba(255,100,80,0.08)',
+                color: 'rgba(255,190,170,0.92)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px',
+                flexWrap: 'wrap',
+                fontSize: '13px',
+              }}
+            >
+              <span>{adminLoadError}. Controlla API/backend, poi ricarica i dati.</span>
+              <button
+                onClick={() => setAdminReloadKey(key => key + 1)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(217,120,47,0.35)',
+                  background: 'rgba(217,120,47,0.12)',
+                  color: '#D9782F',
+                  cursor: 'pointer',
+                  fontWeight: 800,
+                  fontSize: '12px',
+                }}
+              >
+                Ricarica dati
+              </button>
+            </div>
+          )}
+
           {activeTab === 'brand' && (
             <div>
               <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '2px', color: '#F2E2C4', marginBottom: '24px' }}>
