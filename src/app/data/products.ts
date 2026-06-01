@@ -1,0 +1,163 @@
+export interface WeightPrice {
+  weight: string;
+  price: number | 'pvt';
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  brand: string;
+  origin: string;
+  description: string;
+  images: string[];
+  hasVideo: boolean;
+  videoUrl?: string;
+  weights: WeightPrice[];
+  badge?: 'FROZEN' | 'TOP' | null;
+  category: string;
+  isNew: boolean;
+}
+
+export const products: Product[] = [
+  {
+    id: '1',
+    name: 'MAROCCO DRY GOLD',
+    brand: 'LA FARM DEL GAS Selection',
+    origin: 'Marocco',
+    description:
+      'Una selezione premium proveniente direttamente dalle montagne del Marocco. Caratterizzata da un aroma intenso e terroso con note dolci, questa varietà è la scelta ideale per gli intenditori più esigenti. La coltivazione artigianale garantisce una qualità superiore rispetto ai prodotti industriali. Ogni lotto è selezionato manualmente dai nostri esperti sul posto.',
+    images: [
+      'https://images.unsplash.com/photo-1583511335492-7953f39ce779?w=800&q=80',
+      'https://images.unsplash.com/photo-1707647824877-1729e34cbeae?w=800&q=80',
+      'https://images.unsplash.com/photo-1639515967619-78fe8d35dc85?w=800&q=80',
+    ],
+    hasVideo: false,
+    weights: [
+      { weight: '25g', price: 45 },
+      { weight: '50g', price: 85 },
+      { weight: '100g', price: 160 },
+      { weight: '5k', price: 'pvt' },
+      { weight: '10k', price: 'pvt' },
+    ],
+    badge: 'TOP',
+    category: 'Marocco',
+    isNew: false,
+  },
+  {
+    id: '2',
+    name: 'FROZEN CRYSTAL ICE',
+    brand: 'LA FARM DEL GAS Frozen',
+    origin: 'Olanda',
+    description:
+      'Un prodotto unico nella sua categoria: congelato immediatamente dopo la raccolta per preservare tutti gli aromi e le proprietà originali. La tecnica del freeze-drying garantisce una conservazione ottimale della qualità. I cristalli di terpeni sono perfettamente intatti. Ogni grammo è un\'esperienza sensoriale unica e irripetibile.',
+    images: [
+      'https://images.unsplash.com/photo-1644886117384-8cba31e7c541?w=800&q=80',
+      'https://images.unsplash.com/photo-1633620745810-7da0e3b45140?w=800&q=80',
+    ],
+    hasVideo: false,
+    weights: [
+      { weight: '10g', price: 30 },
+      { weight: '25g', price: 70 },
+      { weight: '50g', price: 130 },
+      { weight: '100g', price: 250 },
+      { weight: '5k', price: 'pvt' },
+    ],
+    badge: 'FROZEN',
+    category: 'Frozen',
+    isNew: true,
+  },
+  {
+    id: '3',
+    name: 'MAROCCO LA FARM SELECT',
+    brand: 'LA FARM DEL GAS Exclusive',
+    origin: 'Marocco',
+    description:
+      'La selezione firmata LA FARM DEL GAS dal Marocco. Coltivata nelle fertili valli dell\'Atlante con metodi tradizionali trasmessi di generazione in generazione. Il profumo speziato e la consistenza compatta la rendono inconfondibile. Produzione limitata e certificata. Solo per i clienti più selezionati.',
+    images: [
+      'https://images.unsplash.com/photo-1707647824867-271e33ce703c?w=800&q=80',
+      'https://images.unsplash.com/photo-1707914273132-25532bc233cd?w=800&q=80',
+      'https://images.unsplash.com/photo-1583511335492-7953f39ce779?w=800&q=80',
+    ],
+    hasVideo: false,
+    weights: [
+      { weight: '25g', price: 50 },
+      { weight: '50g', price: 95 },
+      { weight: '100g', price: 180 },
+      { weight: '5k', price: 'pvt' },
+      { weight: '10k', price: 'pvt' },
+    ],
+    badge: 'TOP',
+    category: 'Marocco',
+    isNew: false,
+  },
+  {
+    id: '4',
+    name: 'FROZEN PURPLE HAZE',
+    brand: 'LA FARM DEL GAS Haze',
+    origin: 'Spagna',
+    description:
+      'Una varietà rara proveniente dalla Spagna, congelata al picco della maturazione. Le note floreali e fruttate si combinano con una potenza superiore alla media. Il colore viola intenso dei cristalli è il marchio di riconoscimento di questa varietà esclusiva. Disponibilità molto limitata.',
+    images: [
+      'https://images.unsplash.com/photo-1639515967619-78fe8d35dc85?w=800&q=80',
+      'https://images.unsplash.com/photo-1633620745810-7da0e3b45140?w=800&q=80',
+    ],
+    hasVideo: false,
+    weights: [
+      { weight: '10g', price: 35 },
+      { weight: '25g', price: 80 },
+      { weight: '50g', price: 150 },
+      { weight: '100g', price: 280 },
+    ],
+    badge: 'FROZEN',
+    category: 'Frozen',
+    isNew: true,
+  },
+  {
+    id: '5',
+    name: 'MAROCCO BLACK LABEL',
+    brand: 'LA FARM DEL GAS Black Label',
+    origin: 'Marocco',
+    description:
+      'Il mitico hash nero marocchino, prodotto con tecniche ancestrali. La pressatura manuale a caldo conferisce una consistenza morbida e un aroma inconfondibile di spezie orientali. Una delle selezioni più richieste dai nostri clienti più fedeli. Disponibile in quantità limitate stagionalmente.',
+    images: [
+      'https://images.unsplash.com/photo-1707647824877-1729e34cbeae?w=800&q=80',
+      'https://images.unsplash.com/photo-1644886117384-8cba31e7c541?w=800&q=80',
+    ],
+    hasVideo: false,
+    weights: [
+      { weight: '25g', price: 40 },
+      { weight: '50g', price: 75 },
+      { weight: '100g', price: 140 },
+      { weight: '5k', price: 'pvt' },
+      { weight: '10k', price: 'pvt' },
+    ],
+    badge: null,
+    category: 'Marocco',
+    isNew: false,
+  },
+  {
+    id: '6',
+    name: 'SUPREME FROZEN OG',
+    brand: 'LA FARM DEL GAS OG Frozen',
+    origin: 'USA',
+    description:
+      'L\'OG Kush nelle sue varianti migliori, subito congelate e spedite in Italia. Il profumo agrumato e terroso è inconfondibile. Cristalli abbondanti e una qualità che non delude mai. Per i veri intenditori che non accettano compromessi sulla qualità assoluta.',
+    images: [
+      'https://images.unsplash.com/photo-1707914273132-25532bc233cd?w=800&q=80',
+      'https://images.unsplash.com/photo-1707647824867-271e33ce703c?w=800&q=80',
+    ],
+    hasVideo: false,
+    weights: [
+      { weight: '10g', price: 40 },
+      { weight: '25g', price: 90 },
+      { weight: '50g', price: 170 },
+      { weight: '100g', price: 320 },
+      { weight: '5k', price: 'pvt' },
+    ],
+    badge: 'TOP',
+    category: 'Frozen',
+    isNew: true,
+  },
+];
+
+export const categories = ['Tutti', 'Marocco', 'Frozen'];

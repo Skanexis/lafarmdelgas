@@ -1,0 +1,12 @@
+node_modules
+dist
+.env
+*.log
+.git
+.gitignore
+server/data
+server/uploads
+backend.log
+backend.err.log
+vite-dev.log
+vite-dev.err.log
