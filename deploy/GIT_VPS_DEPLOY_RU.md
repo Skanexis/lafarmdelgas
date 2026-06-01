@@ -592,6 +592,48 @@ curl http://127.0.0.1:49173/api/health
 
 Если менял только товары/контакты через админку, `git pull` не нужен. Эти данные уже лежат на VPS в `server/data`.
 
+### Если `git pull` пишет `Your local changes would be overwritten`
+
+Такое бывает, если на VPS случайно изменили файл проекта вручную. Пример ошибки:
+
+```txt
+error: Your local changes to the following files would be overwritten by merge:
+        server/index.mjs
+Please commit your changes or stash them before you merge.
+```
+
+Безопасный вариант: сначала сохранить локальное изменение VPS во временный stash, потом подтянуть GitHub:
+
+```bash
+cd /opt/lafarmdelgas
+git status
+git diff -- server/index.mjs
+git stash push -m "vps local server/index before deploy" -- server/index.mjs
+git pull
+docker compose up -d --build
+docker image prune -f
+```
+
+Проверка после запуска:
+
+```bash
+curl -s http://127.0.0.1:49173/api/health
+curl -s http://127.0.0.1:49173/api/products
+curl -s http://127.0.0.1:49173/api/categories
+```
+
+Если точно уверен, что изменения на VPS в `server/index.mjs` не нужны, можно просто откатить этот файл:
+
+```bash
+cd /opt/lafarmdelgas
+git restore server/index.mjs
+git pull
+docker compose up -d --build
+docker image prune -f
+```
+
+Не делай `git reset --hard`, если не понимаешь последствия. Он может стереть локальные изменения в проектных файлах. Папки `server/data` и `server/uploads` не должны быть в Git, но аккуратность здесь все равно важна.
+
 ## 18. Бэкап данных
 
 Перед крупными обновлениями делай бэкап:

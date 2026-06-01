@@ -36,6 +36,13 @@
 }
 
 @media (max-width: 860px) {
+  input,
+  textarea,
+  select,
+  button {
+    font-size: 16px !important;
+  }
+
   .app-nav {
     padding: 12px 14px !important;
     gap: 10px !important;
@@ -100,29 +107,46 @@
   }
 
   .admin-sidebar {
-    position: sticky !important;
-    top: 111px !important;
-    z-index: 35 !important;
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    z-index: 80 !important;
     width: 100% !important;
     max-width: 100% !important;
     flex-direction: row !important;
-    overflow-x: auto !important;
+    overflow-x: hidden !important;
     overflow-y: hidden !important;
-    padding: 8px 10px !important;
-    gap: 8px !important;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom)) !important;
+    gap: 6px !important;
     border-right: 0 !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-top: 1px solid rgba(217, 120, 47, 0.22) !important;
+    border-bottom: 0 !important;
     background: rgba(9, 6, 4, 0.94) !important;
     backdrop-filter: blur(16px) !important;
+    box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.38) !important;
   }
 
   .admin-sidebar-button {
-    width: auto !important;
-    min-width: max-content !important;
-    flex: 0 0 auto !important;
-    padding: 9px 12px !important;
+    width: 20% !important;
+    min-width: 0 !important;
+    flex: 1 1 0 !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    min-height: 56px !important;
+    padding: 7px 4px !important;
     white-space: nowrap !important;
-    font-size: 12px !important;
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+    text-align: center !important;
+  }
+
+  .admin-sidebar-button svg {
+    width: 18px !important;
+    height: 18px !important;
+    flex: 0 0 auto !important;
   }
 
   .admin-stats {
@@ -132,7 +156,7 @@
   .admin-main {
     width: 100% !important;
     min-width: 0 !important;
-    padding: 14px !important;
+    padding: 14px 14px calc(92px + env(safe-area-inset-bottom)) !important;
     overflow: visible !important;
   }
 
@@ -147,10 +171,15 @@
     margin-bottom: 16px !important;
   }
 
+  .admin-section-head > div {
+    width: 100% !important;
+  }
+
   .admin-section-head > button,
   .admin-section-head > label {
     width: 100% !important;
     justify-content: center !important;
+    min-height: 46px !important;
   }
 
   .admin-brand-grid,
@@ -166,8 +195,11 @@
   }
 
   .admin-form-card {
-    padding: 16px !important;
-    gap: 14px !important;
+    margin-left: -2px !important;
+    margin-right: -2px !important;
+    padding: 14px !important;
+    gap: 16px !important;
+    border-radius: 8px !important;
   }
 
   .admin-form-header {
@@ -186,14 +218,14 @@
 
   .admin-weight-row {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 34px !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 42px !important;
     gap: 8px !important;
     align-items: center !important;
   }
 
   .admin-image-row {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 34px !important;
+    grid-template-columns: minmax(0, 1fr) 42px !important;
     gap: 8px !important;
     align-items: center !important;
   }
@@ -205,6 +237,16 @@
   .admin-weight-row input,
   .admin-image-row input {
     min-width: 0 !important;
+    min-height: 44px !important;
+  }
+
+  .admin-weight-row button,
+  .admin-image-row button {
+    width: 42px !important;
+    height: 42px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   .admin-form-actions {
@@ -216,6 +258,7 @@
   .admin-form-actions button {
     width: 100% !important;
     justify-content: center !important;
+    min-height: 46px !important;
   }
 
   .admin-product-list {
@@ -224,15 +267,16 @@
 
   .admin-product-row {
     display: grid !important;
-    grid-template-columns: 54px minmax(0, 1fr) 38px !important;
-    align-items: center !important;
-    gap: 10px !important;
+    grid-template-columns: 64px minmax(0, 1fr) !important;
+    align-items: start !important;
+    gap: 12px !important;
     padding: 12px !important;
+    border-radius: 10px !important;
   }
 
   .admin-product-row img {
-    width: 54px !important;
-    height: 54px !important;
+    width: 64px !important;
+    height: 64px !important;
     border-radius: 8px !important;
   }
 
@@ -256,8 +300,14 @@
   }
 
   .admin-product-price {
-    grid-column: 2 / 3 !important;
+    grid-column: 1 / -1 !important;
     text-align: left !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding-top: 8px !important;
+    border-top: 1px solid rgba(242, 226, 196, 0.07) !important;
   }
 
   .admin-product-price p:first-child {
@@ -265,22 +315,28 @@
   }
 
   .admin-product-actions {
-    grid-column: 3 / 4 !important;
-    grid-row: 1 / span 2 !important;
-    flex-direction: column !important;
+    grid-column: 1 / -1 !important;
+    grid-row: auto !important;
+    flex-direction: row !important;
     align-items: stretch !important;
-    gap: 7px !important;
+    gap: 10px !important;
   }
 
   .admin-product-actions button {
-    width: 34px !important;
-    height: 34px !important;
+    width: 100% !important;
+    height: 44px !important;
     justify-content: center !important;
   }
 
   .admin-category-create {
     flex-direction: column !important;
     max-width: 100% !important;
+  }
+
+  .admin-category-create input,
+  .admin-category-create button {
+    width: 100% !important;
+    min-height: 46px !important;
   }
 
   .admin-category-create button {
@@ -291,15 +347,37 @@
     flex-wrap: wrap !important;
     align-items: center !important;
     gap: 10px !important;
+    padding: 12px !important;
   }
 
   .admin-category-row > div {
-    min-width: 0 !important;
+    min-width: calc(100% - 34px) !important;
+    flex: 1 1 calc(100% - 34px) !important;
+  }
+
+  .admin-category-row > button {
+    width: calc(50% - 5px) !important;
+    min-height: 42px !important;
+    justify-content: center !important;
   }
 
   .admin-media-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 10px !important;
+  }
+
+  .admin-main label {
+    font-size: 12px !important;
+  }
+
+  .admin-main input,
+  .admin-main textarea,
+  .admin-main select {
+    min-height: 46px !important;
+  }
+
+  .admin-main textarea {
+    min-height: 110px !important;
   }
 }
 
@@ -308,26 +386,24 @@
     top: 55px !important;
   }
 
-  .admin-sidebar {
-    top: 109px !important;
-  }
-
   .admin-main {
-    padding: 12px !important;
+    padding: 12px 12px calc(92px + env(safe-area-inset-bottom)) !important;
   }
 
   .admin-sidebar-button {
-    padding: 8px 10px !important;
+    min-height: 54px !important;
+    padding: 6px 2px !important;
+    font-size: 9px !important;
   }
 
   .admin-product-row {
-    grid-template-columns: 48px minmax(0, 1fr) 36px !important;
+    grid-template-columns: 58px minmax(0, 1fr) !important;
     padding: 10px !important;
   }
 
   .admin-product-row img {
-    width: 48px !important;
-    height: 48px !important;
+    width: 58px !important;
+    height: 58px !important;
   }
 
   .admin-media-grid {
