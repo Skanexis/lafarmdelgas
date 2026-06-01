@@ -22,7 +22,6 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { products as initialProducts } from '../data/products';
 import type { Product, WeightPrice } from '../data/products';
 import {
   createAdminCategory,
@@ -261,7 +260,7 @@ const emptyForm: FormProduct = {
   hasVideo: false,
   weights: [{ weight: '25g', price: 50 }],
   badge: null,
-  category: 'Marocco',
+  category: '',
   isNew: false,
 };
 
@@ -356,6 +355,7 @@ function ProductForm({
 
   return (
     <motion.div
+      className="admin-form-card"
       initial={{ opacity: 0, x: 40 }}
       animate={{ opacity: 1, x: 0 }}
       style={{
@@ -368,7 +368,7 @@ function ProductForm({
         gap: '18px',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="admin-form-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h3 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: '16px', color: '#D9782F', letterSpacing: '1px' }}>
           {form.id ? 'Modifica Prodotto' : 'Nuovo Prodotto'}
         </h3>
@@ -378,7 +378,7 @@ function ProductForm({
       </div>
 
       {/* Basic fields */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+      <div className="admin-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
         <div style={{ gridColumn: '1 / -1' }}>
           <label style={labelStyle}>Nome prodotto</label>
           <input style={inputStyle} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="es. MAROCCO DRY GOLD" />
@@ -428,7 +428,7 @@ function ProductForm({
         </div>
 
         {/* Checkboxes */}
-        <div style={{ display: 'flex', gap: '20px', gridColumn: '1 / -1' }}>
+        <div className="admin-checkbox-row" style={{ display: 'flex', gap: '20px', gridColumn: '1 / -1' }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: 'rgba(242,226,196,0.6)', fontSize: '13px' }}>
             <input type="checkbox" checked={form.isNew} onChange={e => setForm(f => ({ ...f, isNew: e.target.checked }))} />
             Nuovo prodotto
@@ -449,7 +449,7 @@ function ProductForm({
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {form.weights.map((w, i) => (
-            <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div key={i} className="admin-weight-row" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <input
                 style={{ ...inputStyle, flex: 1 }}
                 value={w.weight}
@@ -486,7 +486,7 @@ function ProductForm({
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {form.images.map((img, i) => (
-            <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div key={i} className="admin-image-row" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <input
                 style={{ ...inputStyle, flex: 1 }}
                 value={img}
@@ -551,7 +551,7 @@ function ProductForm({
       </div>
 
       {/* Actions */}
-      <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+      <div className="admin-form-actions" style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
         <button
           onClick={onCancel}
           style={{ padding: '10px 20px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'none', color: 'rgba(242,226,196,0.5)', cursor: 'pointer', fontSize: '13px' }}
@@ -582,12 +582,12 @@ function ProductForm({
 
 export default function AdminPage() {
   const [adminToken, setAdminToken] = useState(() => sessionStorage.getItem('laFarmAdminToken') || '');
-  const [productList, setProductList] = useState<Product[]>(initialProducts);
+  const [productList, setProductList] = useState<Product[]>([]);
   const [search, setSearch] = useState('');
   const [editingProduct, setEditingProduct] = useState<FormProduct | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [activeTab, setActiveTab] = useState<'brand' | 'products' | 'contacts' | 'categories' | 'media'>('products');
-  const [categoryList, setCategoryList] = useState<string[]>(['Marocco', 'Frozen']);
+  const [categoryList, setCategoryList] = useState<string[]>([]);
   const [settings, setSettings] = useState<SiteSettings>({ logoUrl: '', heroMediaUrl: '' });
   const [contacts, setContacts] = useState<ContactSettings>(defaultContacts);
   const [mediaList, setMediaList] = useState<MediaItem[]>([]);
@@ -782,9 +782,10 @@ export default function AdminPage() {
   ];
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="admin-shell" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Top bar */}
       <div
+        className="admin-topbar"
         style={{
           background: 'rgba(18,12,7,0.95)',
           borderBottom: '1px solid rgba(123,74,136,0.2)',
@@ -821,9 +822,10 @@ export default function AdminPage() {
         </button>
       </div>
 
-      <div style={{ display: 'flex', flex: 1 }}>
+      <div className="admin-layout" style={{ display: 'flex', flex: 1 }}>
         {/* Sidebar */}
         <div
+          className="admin-sidebar"
           style={{
             width: '200px',
             background: 'rgba(9,6,4,0.6)',
@@ -837,6 +839,7 @@ export default function AdminPage() {
         >
           {sidebarItems.map(item => (
             <button
+              className="admin-sidebar-button"
               key={item.key}
               onClick={() => setActiveTab(item.key as any)}
               style={{
@@ -855,7 +858,7 @@ export default function AdminPage() {
           ))}
 
           {/* Stats */}
-          <div style={{ marginTop: 'auto', padding: '16px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="admin-stats" style={{ marginTop: 'auto', padding: '16px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
             <p style={{ color: 'rgba(242,226,196,0.3)', fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '10px' }}>Statistiche</p>
             {[
               { label: 'Prodotti', value: productList.length, color: '#D9782F' },
@@ -871,7 +874,7 @@ export default function AdminPage() {
         </div>
 
         {/* Main content */}
-        <div style={{ flex: 1, padding: '28px', overflow: 'auto' }}>
+        <div className="admin-main" style={{ flex: 1, padding: '28px', overflow: 'auto' }}>
           {activeTab === 'brand' && (
             <div>
               <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '2px', color: '#F2E2C4', marginBottom: '24px' }}>
@@ -879,6 +882,7 @@ export default function AdminPage() {
               </h2>
 
               <div
+                className="admin-brand-grid"
                 style={{
                   display: 'grid',
                   gridTemplateColumns: 'minmax(220px, 320px) minmax(280px, 1fr)',
@@ -972,7 +976,7 @@ export default function AdminPage() {
 
           {activeTab === 'products' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+              <div className="admin-section-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
                 <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '2px', color: '#F2E2C4' }}>
                   GESTIONE PRODOTTI
                 </h2>
@@ -998,7 +1002,7 @@ export default function AdminPage() {
               </div>
 
               {/* Search */}
-              <div style={{ position: 'relative', maxWidth: '380px', marginBottom: '20px' }}>
+              <div className="admin-search" style={{ position: 'relative', maxWidth: '380px', marginBottom: '20px' }}>
                 <Search size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(217,120,47,0.5)' }} />
                 <input
                   type="text"
@@ -1031,7 +1035,7 @@ export default function AdminPage() {
               </AnimatePresence>
 
               {/* Product list */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div className="admin-product-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {loadingProducts && (
                   <div style={{ padding: '28px', color: 'rgba(242,226,196,0.45)', fontSize: '13px', textAlign: 'center' }}>
                     Caricamento prodotti...
@@ -1040,6 +1044,7 @@ export default function AdminPage() {
 
                 {!loadingProducts && filtered.map((p, i) => (
                   <motion.div
+                    className="admin-product-row"
                     key={p.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -1061,8 +1066,8 @@ export default function AdminPage() {
                     />
 
                     {/* Info */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
+                    <div className="admin-product-info" style={{ flex: 1, minWidth: 0 }}>
+                      <div className="admin-product-title-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
                         <p style={{ color: '#F2E2C4', fontWeight: 600, fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {p.name}
                         </p>
@@ -1084,7 +1089,7 @@ export default function AdminPage() {
                     </div>
 
                     {/* Price range */}
-                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    <div className="admin-product-price" style={{ textAlign: 'right', flexShrink: 0 }}>
                       <p style={{ color: '#D9782F', fontWeight: 700, fontSize: '14px' }}>
                         €{(p.weights.find(w => w.price !== 'pvt')?.price as number) ?? '—'}+
                       </p>
@@ -1092,7 +1097,7 @@ export default function AdminPage() {
                     </div>
 
                     {/* Actions */}
-                    <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                    <div className="admin-product-actions" style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                       <button
                         onClick={() => handleEdit(p)}
                         style={{
@@ -1129,7 +1134,7 @@ export default function AdminPage() {
 
           {activeTab === 'contacts' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+              <div className="admin-section-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                   <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '2px', color: '#F2E2C4', marginBottom: '6px' }}>
                     CONTATTI
@@ -1162,6 +1167,7 @@ export default function AdminPage() {
               </div>
 
               <div
+                className="admin-contacts-grid"
                 style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
@@ -1233,13 +1239,14 @@ export default function AdminPage() {
 
           {activeTab === 'categories' && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+              <div className="admin-section-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
                 <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '2px', color: '#F2E2C4' }}>
                   GESTIONE CATEGORIE
                 </h2>
               </div>
 
               <div
+                className="admin-category-create"
                 style={{
                   display: 'flex',
                   gap: '10px',
@@ -1292,6 +1299,7 @@ export default function AdminPage() {
 
                   return (
                     <div
+                      className="admin-category-row"
                       key={category}
                       style={{
                         display: 'flex',
@@ -1416,7 +1424,7 @@ export default function AdminPage() {
 
           {activeTab === 'media' && (
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', gap: '14px', flexWrap: 'wrap' }}>
+              <div className="admin-section-head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', gap: '14px', flexWrap: 'wrap' }}>
                 <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '2px', color: '#F2E2C4' }}>
                   MEDIA LIBRARY
                 </h2>
@@ -1463,7 +1471,7 @@ export default function AdminPage() {
                   />
                 </label>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '14px' }}>
+              <div className="admin-media-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '14px' }}>
                 {mediaList.map((media, i) => (
                   <div
                     key={media.url}

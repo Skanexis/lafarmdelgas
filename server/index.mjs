@@ -73,6 +73,7 @@ function sendJson(res, status, payload) {
     'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Admin-Token',
     'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
   });
   res.end(JSON.stringify(payload));
 }

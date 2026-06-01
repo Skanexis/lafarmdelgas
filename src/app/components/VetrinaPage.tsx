@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { AnimatePresence, motion } from 'motion/react';
 import { Search, X } from 'lucide-react';
-import { products } from '../data/products';
 import type { Product } from '../data/products';
 import { ProductCard } from './ProductCard';
 import { ProductDetailModal } from './ProductDetailModal';
@@ -12,8 +11,8 @@ export default function VetrinaPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('Tutti');
-  const [productList, setProductList] = useState<Product[]>(products);
-  const [adminCategories, setAdminCategories] = useState<string[]>([]);
+  const [productList, setProductList] = useState<Product[]>([]);
+  const [adminCategories, setAdminCategories] = useState<string[] | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   useEffect(() => {
@@ -21,13 +20,13 @@ export default function VetrinaPage() {
 
     fetchProducts()
       .then(apiProducts => {
-        if (active && apiProducts.length) {
+        if (active) {
           setProductList(apiProducts);
         }
       })
       .catch(() => {
         if (active) {
-          setProductList(products);
+          setProductList([]);
         }
       });
 
@@ -44,7 +43,7 @@ export default function VetrinaPage() {
         if (active) setAdminCategories(categories);
       })
       .catch(() => {
-        if (active) setAdminCategories([]);
+        if (active) setAdminCategories(null);
       });
 
     return () => {
@@ -53,10 +52,16 @@ export default function VetrinaPage() {
   }, []);
 
   const categoryList = useMemo(() => {
-    const source = adminCategories.length ? adminCategories : productList.map(product => product.category);
+    const source = adminCategories ?? productList.map(product => product.category);
     const uniqueCategories = Array.from(new Set(source.filter(Boolean)));
     return ['Tutti', ...uniqueCategories];
   }, [adminCategories, productList]);
+
+  useEffect(() => {
+    if (!categoryList.includes(activeCategory)) {
+      setActiveCategory('Tutti');
+    }
+  }, [activeCategory, categoryList]);
 
   const filtered = useMemo(() => {
     let list = [...productList];

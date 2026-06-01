@@ -19,6 +19,7 @@ export default function Root() {
       {/* Floating Nav */}
       {!isHome && (
         <nav
+          className="app-nav"
           style={{
             position: 'fixed',
             top: 0,
@@ -61,6 +62,7 @@ export default function Root() {
           </button>
 
           <Link
+            className="app-nav-brand"
             to="/"
             style={{
               display: 'flex',
@@ -84,7 +86,7 @@ export default function Root() {
             </span>
           </Link>
 
-          <div style={{ width: '96px' }} />
+          <div className="app-nav-spacer" style={{ width: '96px' }} />
         </nav>
       )}
 
