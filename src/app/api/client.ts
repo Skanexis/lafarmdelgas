@@ -139,13 +139,14 @@ export function fetchAdminMedia(token: string) {
 }
 
 export function uploadAdminFile(token: string, file: File) {
-  const body = new FormData();
-  body.append('file', file);
-
   return request<MediaItem>('/admin/upload', {
     method: 'POST',
-    headers: adminHeaders(token),
-    body,
+    headers: {
+      ...adminHeaders(token),
+      'Content-Type': file.type || 'application/octet-stream',
+      'X-File-Name': encodeURIComponent(file.name || 'upload.bin'),
+    },
+    body: file,
   });
 }
 

@@ -1,6 +1,7 @@
 import http from 'node:http';
-import { mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { once } from 'node:events';
+import { mkdir, readFile, readdir, stat, unlink, writeFile } from 'node:fs/promises';
+import { createWriteStream, existsSync } from 'node:fs';
 import { basename, dirname, extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { seedProducts } from './seed-products.mjs';
@@ -71,7 +72,7 @@ function sendJson(res, status, payload) {
   res.writeHead(status, {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Admin-Token',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Admin-Token, X-File-Name',
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
   });
@@ -136,6 +137,35 @@ function readRequestBuffer(req, maxBytes = 50_000_000) {
     req.on('end', () => resolve(Buffer.concat(chunks)));
     req.on('error', reject);
   });
+}
+
+async function writeRequestFile(req, filePath, maxBytes) {
+  const output = createWriteStream(filePath, { flags: 'wx' });
+  let size = 0;
+
+  try {
+    for await (const chunk of req) {
+      size += chunk.length;
+
+      if (size > maxBytes) {
+        const error = new Error('Payload too large');
+        error.status = 413;
+        throw error;
+      }
+
+      if (!output.write(chunk)) {
+        await once(output, 'drain');
+      }
+    }
+
+    output.end();
+    await once(output, 'finish');
+    return size;
+  } catch (error) {
+    output.destroy();
+    await unlink(filePath).catch(() => {});
+    throw error;
+  }
 }
 
 function parseMultipart(buffer, contentType) {
@@ -443,34 +473,62 @@ async function handleRequest(req, res) {
     }
 
     const contentType = req.headers['content-type'] || '';
-    if (!contentType.includes('multipart/form-data')) {
-      sendJson(res, 400, { error: 'Expected multipart form data' });
+    const maxUploadBytes = Number(process.env.UPLOAD_MAX_BYTES || 1_073_741_824);
+
+    if (contentType.includes('multipart/form-data')) {
+      const parts = parseMultipart(await readRequestBuffer(req, maxUploadBytes), contentType);
+      const file = parts.find(part => part.filename && part.data.length);
+
+      if (!file) {
+        sendJson(res, 400, { error: 'File is required' });
+        return;
+      }
+
+      const detectedMime = file.mime === 'application/octet-stream' ? contentTypeForFile(file.filename) : file.mime;
+      const type = mediaTypeFromMime(detectedMime);
+      const name = safeUploadName(file.filename);
+      const filePath = join(uploadsDir, name);
+      await writeFile(filePath, file.data);
+
+      sendJson(res, 201, {
+        name,
+        originalName: file.filename,
+        url: `/uploads/${encodeURIComponent(name)}`,
+        mime: detectedMime,
+        type,
+        size: file.data.length,
+      });
       return;
     }
 
-    const maxUploadBytes = Number(process.env.UPLOAD_MAX_BYTES || 1_073_741_824);
-    const parts = parseMultipart(await readRequestBuffer(req, maxUploadBytes), contentType);
-    const file = parts.find(part => part.filename && part.data.length);
+    const encodedName = req.headers['x-file-name'];
+    const originalName = encodedName ? decodeURIComponent(String(encodedName)) : '';
 
-    if (!file) {
+    if (!originalName) {
+      sendJson(res, 400, { error: 'File name is required' });
+      return;
+    }
+
+    const detectedMime =
+      !contentType || contentType === 'application/octet-stream' ? contentTypeForFile(originalName) : contentType;
+    const type = mediaTypeFromMime(detectedMime);
+    const name = safeUploadName(originalName);
+    const filePath = join(uploadsDir, name);
+    const size = await writeRequestFile(req, filePath, maxUploadBytes);
+
+    if (!size) {
+      await unlink(filePath).catch(() => {});
       sendJson(res, 400, { error: 'File is required' });
       return;
     }
 
-    const detectedMime = file.mime === 'application/octet-stream' ? contentTypeForFile(file.filename) : file.mime;
-    const type = mediaTypeFromMime(detectedMime);
-
-    const name = safeUploadName(file.filename);
-    const filePath = join(uploadsDir, name);
-    await writeFile(filePath, file.data);
-
     sendJson(res, 201, {
       name,
-      originalName: file.filename,
+      originalName,
       url: `/uploads/${encodeURIComponent(name)}`,
       mime: detectedMime,
       type,
-      size: file.data.length,
+      size,
     });
     return;
   }
