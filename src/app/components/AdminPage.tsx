@@ -316,15 +316,15 @@ function ProductForm({
     });
   };
 
-  const uploadProductMedia = async (files: FileList | null) => {
-    if (!files?.length) return;
+  const uploadProductMedia = async (files: File[]) => {
+    if (!files.length) return;
 
     setUploadingMedia(true);
     let uploadedCount = 0;
     let failedCount = 0;
 
     try {
-      for (const file of Array.from(files)) {
+      for (const file of files) {
         try {
           const uploaded = await onUploadFile(file);
           uploadedCount += 1;
@@ -567,13 +567,21 @@ function ProductForm({
           {uploadingMedia ? 'Upload in corso...' : 'Carica file'}
           <input
             type="file"
+            accept="image/*,video/*"
             multiple
             disabled={uploadingMedia}
             onChange={e => {
-              uploadProductMedia(e.target.files);
+              const selectedFiles = Array.from(e.currentTarget.files || []);
               e.currentTarget.value = '';
+              uploadProductMedia(selectedFiles);
             }}
-            style={{ display: 'none' }}
+            style={{
+              position: 'absolute',
+              width: '1px',
+              height: '1px',
+              opacity: 0,
+              pointerEvents: 'none',
+            }}
           />
         </label>
 
