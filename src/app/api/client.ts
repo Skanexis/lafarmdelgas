@@ -43,7 +43,22 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
+    let message = `API request failed: ${response.status}`;
+
+    try {
+      const payload = await response.json();
+      if (payload?.error) {
+        message = String(payload.error);
+      }
+    } catch {
+      if (response.status === 413) {
+        message = 'File troppo grande per il server';
+      }
+    }
+
+    const error = new Error(message);
+    Object.assign(error, { status: response.status });
+    throw error;
   }
 
   return response.json() as Promise<T>;

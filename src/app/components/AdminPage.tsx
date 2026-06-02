@@ -321,7 +321,7 @@ function ProductForm({
 
     setUploadingMedia(true);
     let uploadedCount = 0;
-    let failedCount = 0;
+    const failedFiles: string[] = [];
 
     try {
       for (const file of files) {
@@ -354,8 +354,9 @@ function ProductForm({
               files: nextFiles,
             };
           });
-        } catch {
-          failedCount += 1;
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Upload non riuscito';
+          failedFiles.push(`${file.name}: ${message}`);
         }
       }
 
@@ -363,8 +364,11 @@ function ProductForm({
         toast.success(uploadedCount === 1 ? 'File caricato' : `${uploadedCount} file caricati`);
       }
 
-      if (failedCount) {
-        toast.error(`${failedCount} file non caricati`);
+      if (failedFiles.length) {
+        toast.error(failedFiles[0], {
+          description: failedFiles.length > 1 ? `${failedFiles.length - 1} altri file non caricati` : undefined,
+          duration: 7000,
+        });
       }
     } finally {
       setUploadingMedia(false);

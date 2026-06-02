@@ -11,6 +11,7 @@ services:
       API_HOST: 0.0.0.0
       API_PORT: 8787
       ADMIN_TOKEN: ${ADMIN_TOKEN:?Set ADMIN_TOKEN in .env}
+      UPLOAD_MAX_BYTES: ${UPLOAD_MAX_BYTES:-500000000}
     volumes:
       - ./server/data:/app/server/data
       - ./server/uploads:/app/server/uploads

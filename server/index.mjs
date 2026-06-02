@@ -94,7 +94,9 @@ function parseBody(req) {
     req.on('data', chunk => {
       body += chunk;
       if (body.length > 1_000_000) {
-        reject(new Error('Payload too large'));
+        const error = new Error('Payload too large');
+        error.status = 413;
+        reject(error);
         req.destroy();
       }
     });
@@ -122,7 +124,9 @@ function readRequestBuffer(req, maxBytes = 50_000_000) {
     req.on('data', chunk => {
       size += chunk.length;
       if (size > maxBytes) {
-        reject(new Error('Payload too large'));
+        const error = new Error('Payload too large');
+        error.status = 413;
+        reject(error);
         req.destroy();
         return;
       }
@@ -178,6 +182,8 @@ function contentTypeForFile(filePath) {
   const types = {
     '.jpg': 'image/jpeg',
     '.jpeg': 'image/jpeg',
+    '.heic': 'image/heic',
+    '.heif': 'image/heif',
     '.png': 'image/png',
     '.webp': 'image/webp',
     '.gif': 'image/gif',
@@ -187,6 +193,10 @@ function contentTypeForFile(filePath) {
     '.mov': 'video/quicktime',
     '.m4v': 'video/x-m4v',
     '.avi': 'video/x-msvideo',
+    '.mkv': 'video/x-matroska',
+    '.mpeg': 'video/mpeg',
+    '.mpg': 'video/mpeg',
+    '.3gp': 'video/3gpp',
     '.pdf': 'application/pdf',
     '.txt': 'text/plain',
     '.csv': 'text/csv',
@@ -624,7 +634,7 @@ await ensureDataFiles();
 http
   .createServer((req, res) => {
     handleRequest(req, res).catch(error => {
-      sendJson(res, 500, { error: error.message || 'Internal server error' });
+      sendJson(res, error.status || 500, { error: error.message || 'Internal server error' });
     });
   })
   .listen(port, host, () => {
