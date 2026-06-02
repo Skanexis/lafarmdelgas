@@ -758,14 +758,23 @@ docker compose logs -f backend
 В проектных конфигах уже стоит:
 
 ```nginx
-client_max_body_size 50m;
+client_max_body_size 1024m;
 ```
 
-Если надо больше, поменяй `50m` на `100m` в:
+Для видео до 1 GB также должен быть задан backend-лимит:
+
+```env
+UPLOAD_MAX_BYTES=1073741824
+```
+
+Если надо больше, поменяй `1024m` и `UPLOAD_MAX_BYTES` в:
 
 ```txt
 deploy/nginx/app.conf
+deploy/nginx/lafarmdelgas.com.http.conf
+deploy/nginx/lafarmdelgas.com.ssl.conf
 /etc/nginx/sites-available/lafarmdelgas.com
+.env
 ```
 
 Потом:

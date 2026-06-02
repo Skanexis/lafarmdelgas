@@ -448,7 +448,7 @@ async function handleRequest(req, res) {
       return;
     }
 
-    const maxUploadBytes = Number(process.env.UPLOAD_MAX_BYTES || 250_000_000);
+    const maxUploadBytes = Number(process.env.UPLOAD_MAX_BYTES || 1_073_741_824);
     const parts = parseMultipart(await readRequestBuffer(req, maxUploadBytes), contentType);
     const file = parts.find(part => part.filename && part.data.length);
 
