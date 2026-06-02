@@ -187,6 +187,13 @@ function contentTypeForFile(filePath) {
     '.mov': 'video/quicktime',
     '.m4v': 'video/x-m4v',
     '.avi': 'video/x-msvideo',
+    '.pdf': 'application/pdf',
+    '.txt': 'text/plain',
+    '.csv': 'text/csv',
+    '.json': 'application/json',
+    '.zip': 'application/zip',
+    '.rar': 'application/vnd.rar',
+    '.7z': 'application/x-7z-compressed',
   };
 
   return types[ext] || 'application/octet-stream';
@@ -209,6 +216,22 @@ function isAuthorized(req) {
 }
 
 function normalizeProduct(input, existingId) {
+  const files = Array.isArray(input.files)
+    ? input.files
+        .filter(file => file && file.url)
+        .map(file => {
+          const mime = String(file.mime || 'application/octet-stream');
+          return {
+            name: String(file.name || basename(String(file.url))),
+            originalName: file.originalName ? String(file.originalName) : undefined,
+            url: String(file.url),
+            mime,
+            type: ['image', 'video', 'file'].includes(file.type) ? file.type : mediaTypeFromMime(mime),
+            size: Number.isFinite(Number(file.size)) ? Number(file.size) : 0,
+          };
+        })
+    : [];
+
   const product = {
     id: String(existingId || input.id || Date.now()),
     name: String(input.name || '').trim(),
@@ -216,8 +239,9 @@ function normalizeProduct(input, existingId) {
     origin: String(input.origin || '').trim(),
     description: String(input.description || '').trim(),
     images: Array.isArray(input.images) ? input.images.filter(Boolean).map(String) : [],
-    hasVideo: Boolean(input.hasVideo),
+    hasVideo: Boolean(input.hasVideo || input.videoUrl),
     videoUrl: input.videoUrl ? String(input.videoUrl) : undefined,
+    files,
     weights: Array.isArray(input.weights) ? input.weights : [],
     badge: input.badge || null,
     category: String(input.category || '').trim(),
@@ -414,7 +438,8 @@ async function handleRequest(req, res) {
       return;
     }
 
-    const parts = parseMultipart(await readRequestBuffer(req), contentType);
+    const maxUploadBytes = Number(process.env.UPLOAD_MAX_BYTES || 250_000_000);
+    const parts = parseMultipart(await readRequestBuffer(req, maxUploadBytes), contentType);
     const file = parts.find(part => part.filename && part.data.length);
 
     if (!file) {
@@ -422,11 +447,8 @@ async function handleRequest(req, res) {
       return;
     }
 
-    const type = mediaTypeFromMime(file.mime);
-    if (!['image', 'video'].includes(type)) {
-      sendJson(res, 400, { error: 'Only image and video files are supported' });
-      return;
-    }
+    const detectedMime = file.mime === 'application/octet-stream' ? contentTypeForFile(file.filename) : file.mime;
+    const type = mediaTypeFromMime(detectedMime);
 
     const name = safeUploadName(file.filename);
     const filePath = join(uploadsDir, name);
@@ -436,7 +458,7 @@ async function handleRequest(req, res) {
       name,
       originalName: file.filename,
       url: `/uploads/${encodeURIComponent(name)}`,
-      mime: file.mime,
+      mime: detectedMime,
       type,
       size: file.data.length,
     });

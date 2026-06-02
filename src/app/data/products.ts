@@ -3,6 +3,15 @@ export interface WeightPrice {
   price: number | 'pvt';
 }
 
+export interface ProductFile {
+  name: string;
+  originalName?: string;
+  url: string;
+  mime: string;
+  type: 'image' | 'video' | 'file';
+  size: number;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -12,6 +21,7 @@ export interface Product {
   images: string[];
   hasVideo: boolean;
   videoUrl?: string;
+  files?: ProductFile[];
   weights: WeightPrice[];
   badge?: 'FROZEN' | 'TOP' | null;
   category: string;

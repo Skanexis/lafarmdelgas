@@ -8,12 +8,10 @@ import {
   Edit3,
   Trash2,
   Search,
-  Snowflake,
-  Star,
   X,
   Save,
-  Eye,
   Image as ImageIcon,
+  File as FileIcon,
   Leaf,
   Settings,
   Tags,
@@ -28,7 +26,6 @@ import {
   createAdminProduct,
   deleteAdminCategory,
   deleteAdminProduct,
-  fetchAdminMedia,
   fetchCategories,
   fetchContacts,
   fetchProducts,
@@ -256,8 +253,9 @@ const emptyForm: FormProduct = {
   brand: '',
   origin: '',
   description: '',
-  images: [''],
+  images: [],
   hasVideo: false,
+  files: [],
   weights: [{ weight: '25g', price: 50 }],
   badge: null,
   category: '',
@@ -282,6 +280,15 @@ function ProductForm({
   const [form, setForm] = useState<FormProduct>({ ...initial });
   const [uploadingMedia, setUploadingMedia] = useState(false);
 
+  useEffect(() => {
+    setForm({
+      ...initial,
+      images: initial.images?.filter(Boolean) || [],
+      files: initial.files || [],
+      hasVideo: Boolean(initial.videoUrl || initial.hasVideo),
+    });
+  }, [initial]);
+
   const updateWeight = (i: number, field: keyof WeightPrice, val: string) => {
     const ws = [...form.weights];
     if (field === 'price') {
@@ -295,40 +302,105 @@ function ProductForm({
   const addWeight = () => setForm(f => ({ ...f, weights: [...f.weights, { weight: '', price: 0 }] }));
   const removeWeight = (i: number) => setForm(f => ({ ...f, weights: f.weights.filter((_, idx) => idx !== i) }));
 
-  const updateImage = (i: number, val: string) => {
-    const imgs = [...form.images];
-    imgs[i] = val;
-    setForm(f => ({ ...f, images: imgs }));
+  const removeProductFile = (url: string) => {
+    setForm(f => {
+      const nextVideoUrl = f.videoUrl === url ? undefined : f.videoUrl;
+
+      return {
+        ...f,
+        images: f.images.filter(image => image !== url),
+        files: (f.files || []).filter(file => file.url !== url),
+        videoUrl: nextVideoUrl,
+        hasVideo: Boolean(nextVideoUrl),
+      };
+    });
   };
-  const addImage = () => setForm(f => ({ ...f, images: [...f.images, ''] }));
-  const removeImage = (i: number) => setForm(f => ({ ...f, images: f.images.filter((_, idx) => idx !== i) }));
 
   const uploadProductMedia = async (files: FileList | null) => {
     if (!files?.length) return;
 
     setUploadingMedia(true);
+    let uploadedCount = 0;
+    let failedCount = 0;
+
     try {
       for (const file of Array.from(files)) {
-        const uploaded = await onUploadFile(file);
-        if (uploaded.type === 'image') {
-          setForm(f => ({
-            ...f,
-            images: [...f.images.filter(Boolean), uploaded.url],
-          }));
-        } else if (uploaded.type === 'video') {
-          setForm(f => ({
-            ...f,
-            hasVideo: true,
-            videoUrl: uploaded.url,
-          }));
+        try {
+          const uploaded = await onUploadFile(file);
+          uploadedCount += 1;
+
+          setForm(f => {
+            const nextFiles = [...(f.files || []).filter(item => item.url !== uploaded.url), uploaded];
+
+            if (uploaded.type === 'image') {
+              return {
+                ...f,
+                images: [...f.images.filter(Boolean), uploaded.url],
+                files: nextFiles,
+              };
+            }
+
+            if (uploaded.type === 'video') {
+              return {
+                ...f,
+                hasVideo: true,
+                videoUrl: uploaded.url,
+                files: nextFiles,
+              };
+            }
+
+            return {
+              ...f,
+              files: nextFiles,
+            };
+          });
+        } catch {
+          failedCount += 1;
         }
       }
-      toast.success('Media caricato');
-    } catch {
-      toast.error('Upload media non riuscito');
+
+      if (uploadedCount) {
+        toast.success(uploadedCount === 1 ? 'File caricato' : `${uploadedCount} file caricati`);
+      }
+
+      if (failedCount) {
+        toast.error(`${failedCount} file non caricati`);
+      }
     } finally {
       setUploadingMedia(false);
     }
+  };
+
+  const uploadedFiles = form.files || [];
+  const productFiles: MediaItem[] = [
+    ...form.images
+      .filter(Boolean)
+      .filter(url => !uploadedFiles.some(file => file.url === url))
+      .map(url => ({
+        name: url.split('/').pop() || 'Immagine prodotto',
+        url,
+        mime: 'image/*',
+        type: 'image' as const,
+        size: 0,
+      })),
+    ...(form.videoUrl && !uploadedFiles.some(file => file.url === form.videoUrl)
+      ? [
+          {
+            name: form.videoUrl.split('/').pop() || 'Video prodotto',
+            url: form.videoUrl,
+            mime: 'video/*',
+            type: 'video' as const,
+            size: 0,
+          },
+        ]
+      : []),
+    ...uploadedFiles,
+  ];
+
+  const formatFileSize = (size: number) => {
+    if (!size) return '';
+    if (size < 1024 * 1024) return `${Math.ceil(size / 1024)} KB`;
+    return `${(size / 1024 / 1024).toFixed(1)} MB`;
   };
 
   const inputStyle: React.CSSProperties = {
@@ -473,51 +545,8 @@ function ProductForm({
         </div>
       </div>
 
-      {/* Images */}
       <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-          <label style={labelStyle}>URL Immagini</label>
-          <button
-            onClick={addImage}
-            style={{ background: 'rgba(217,120,47,0.1)', border: '1px solid rgba(217,120,47,0.3)', borderRadius: '8px', padding: '4px 10px', color: '#D9782F', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-          >
-            <Plus size={12} /> Aggiungi
-          </button>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {form.images.map((img, i) => (
-            <div key={i} className="admin-image-row" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <input
-                style={{ ...inputStyle, flex: 1 }}
-                value={img}
-                onChange={e => updateImage(i, e.target.value)}
-                placeholder="https://..."
-              />
-              {form.images.length > 1 && (
-                <button
-                  onClick={() => removeImage(i)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,100,100,0.6)', padding: '4px' }}
-                >
-                  <Trash2 size={14} />
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <label style={labelStyle}>Video prodotto</label>
-        <input
-          style={inputStyle}
-          value={form.videoUrl || ''}
-          onChange={e => setForm(f => ({ ...f, videoUrl: e.target.value, hasVideo: Boolean(e.target.value.trim()) }))}
-          placeholder="URL video oppure carica file"
-        />
-      </div>
-
-      <div>
-        <label style={labelStyle}>Carica file prodotto</label>
+        <label style={labelStyle}>File prodotto</label>
         <label
           style={{
             display: 'flex',
@@ -535,10 +564,9 @@ function ProductForm({
           }}
         >
           <Upload size={15} />
-          {uploadingMedia ? 'Upload in corso...' : 'Foto o video'}
+          {uploadingMedia ? 'Upload in corso...' : 'Carica file'}
           <input
             type="file"
-            accept="image/*,video/*"
             multiple
             disabled={uploadingMedia}
             onChange={e => {
@@ -548,6 +576,76 @@ function ProductForm({
             style={{ display: 'none' }}
           />
         </label>
+
+        {productFiles.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
+            {productFiles.map(file => {
+              const label = file.originalName || file.name || file.url.split('/').pop() || 'File';
+              return (
+                <div
+                  key={file.url}
+                  className="admin-image-row"
+                  style={{
+                    display: 'flex',
+                    gap: '10px',
+                    alignItems: 'center',
+                    padding: '9px 10px',
+                    borderRadius: '6px',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    background: 'rgba(255,255,255,0.03)',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '42px',
+                      height: '32px',
+                      borderRadius: '6px',
+                      background: 'rgba(217,120,47,0.08)',
+                      border: '1px solid rgba(217,120,47,0.16)',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#D9782F',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {file.type === 'image' ? (
+                      <img
+                        src={resolveMediaUrl(file.url)}
+                        alt=""
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : file.type === 'video' ? (
+                      <Video size={15} />
+                    ) : (
+                      <FileIcon size={15} />
+                    )}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ color: '#F2E2C4', fontSize: '12px', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {label}
+                    </p>
+                    <p style={{ color: 'rgba(242,226,196,0.36)', fontSize: '11px' }}>
+                      {file.type.toUpperCase()}{formatFileSize(file.size) ? ` · ${formatFileSize(file.size)}` : ''}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => removeProductFile(file.url)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,100,100,0.68)', padding: '4px', display: 'flex' }}
+                    aria-label="Rimuovi file"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p style={{ color: 'rgba(242,226,196,0.36)', fontSize: '12px', marginTop: '8px' }}>
+            Carica almeno una foto per mostrare il prodotto in vetrina.
+          </p>
+        )}
       </div>
 
       {/* Actions */}
@@ -586,11 +684,10 @@ export default function AdminPage() {
   const [search, setSearch] = useState('');
   const [editingProduct, setEditingProduct] = useState<FormProduct | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [activeTab, setActiveTab] = useState<'brand' | 'products' | 'contacts' | 'categories' | 'media'>('products');
+  const [activeTab, setActiveTab] = useState<'brand' | 'products' | 'contacts' | 'categories'>('products');
   const [categoryList, setCategoryList] = useState<string[]>([]);
   const [settings, setSettings] = useState<SiteSettings>({ logoUrl: '', heroMediaUrl: '' });
   const [contacts, setContacts] = useState<ContactSettings>(defaultContacts);
-  const [mediaList, setMediaList] = useState<MediaItem[]>([]);
   const [newCategory, setNewCategory] = useState('');
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [editingCategoryName, setEditingCategoryName] = useState('');
@@ -626,12 +723,11 @@ export default function AdminPage() {
         fetchCategories(),
         fetchSettings(),
         fetchContacts(),
-        fetchAdminMedia(adminToken),
       ]);
 
       if (!active) return;
 
-      const [productsResult, categoriesResult, settingsResult, contactsResult, mediaResult] = results;
+      const [productsResult, categoriesResult, settingsResult, contactsResult] = results;
       const failed: string[] = [];
 
       if (productsResult.status === 'fulfilled') {
@@ -656,12 +752,6 @@ export default function AdminPage() {
         setContacts(contactsResult.value);
       } else {
         failed.push('contatti');
-      }
-
-      if (mediaResult.status === 'fulfilled') {
-        setMediaList(mediaResult.value);
-      } else {
-        failed.push('media');
       }
 
       if (failed.length) {
@@ -701,6 +791,11 @@ export default function AdminPage() {
     setSavingProduct(true);
 
     try {
+      if (!form.images.filter(Boolean).length) {
+        toast.error('Carica almeno una foto del prodotto');
+        return;
+      }
+
       if (form.id) {
         const saved = await updateAdminProduct(adminToken, form.id, form);
         setProductList(list => list.map(p => (p.id === saved.id ? saved : p)));
@@ -739,7 +834,6 @@ export default function AdminPage() {
 
   const handleUploadFile = async (file: File) => {
     const uploaded = await uploadAdminFile(adminToken, file);
-    setMediaList(list => [uploaded, ...list]);
     return uploaded;
   };
 
@@ -835,7 +929,6 @@ export default function AdminPage() {
     { key: 'products', label: 'Prodotti', icon: <Package size={17} /> },
     { key: 'contacts', label: 'Contatti', icon: <MessageCircle size={17} /> },
     { key: 'categories', label: 'Categorie', icon: <Tags size={17} /> },
-    { key: 'media', label: 'Media', icon: <Eye size={17} /> },
   ];
 
   return (
@@ -1512,91 +1605,6 @@ export default function AdminPage() {
               <p style={{ color: 'rgba(242,226,196,0.38)', fontSize: '12px', marginTop: '18px', maxWidth: '720px' }}>
                 "Tutti" non si modifica qui: resta un filtro automatico della vetrina.
               </p>
-            </div>
-          )}
-
-          {activeTab === 'media' && (
-            <div>
-              <div className="admin-section-head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', gap: '14px', flexWrap: 'wrap' }}>
-                <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '2px', color: '#F2E2C4' }}>
-                  MEDIA LIBRARY
-                </h2>
-                <label
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '10px 16px',
-                    borderRadius: '6px',
-                    border: '1px solid rgba(143,166,74,0.38)',
-                    background: 'rgba(143,166,74,0.1)',
-                    color: '#8FA64A',
-                    cursor: uploadingFile ? 'not-allowed' : 'pointer',
-                    fontWeight: 800,
-                    fontSize: '13px',
-                  }}
-                >
-                  <Upload size={15} />
-                  {uploadingFile ? 'Upload...' : 'Carica media'}
-                  <input
-                    type="file"
-                    accept="image/*,video/*"
-                    multiple
-                    disabled={uploadingFile}
-                    onChange={async e => {
-                      const files = Array.from(e.target.files || []);
-                      e.currentTarget.value = '';
-                      if (!files.length) return;
-
-                      setUploadingFile(true);
-                      try {
-                        for (const file of files) {
-                          await handleUploadFile(file);
-                        }
-                        toast.success('Media caricati');
-                      } catch {
-                        toast.error('Upload media non riuscito');
-                      } finally {
-                        setUploadingFile(false);
-                      }
-                    }}
-                    style={{ display: 'none' }}
-                  />
-                </label>
-              </div>
-              <div className="admin-media-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '14px' }}>
-                {mediaList.map((media, i) => (
-                  <div
-                    key={media.url}
-                    style={{
-                      borderRadius: '6px', overflow: 'hidden',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      aspectRatio: '4/3', position: 'relative',
-                      background: 'rgba(255,255,255,0.03)',
-                    }}
-                  >
-                    {media.type === 'video' ? (
-                      <video src={resolveMediaUrl(media.url)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted />
-                    ) : (
-                      <img src={resolveMediaUrl(media.url)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    )}
-                    <div style={{
-                      position: 'absolute', inset: 0,
-                      background: 'linear-gradient(to top, rgba(9,6,4,0.8) 0%, transparent 60%)',
-                    }} />
-                    <div style={{ position: 'absolute', bottom: '8px', left: '8px', right: '8px', display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(242,226,196,0.72)', fontSize: '10px' }}>
-                      {media.type === 'video' ? <Video size={12} /> : <ImageIcon size={12} />}
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{media.name || i + 1}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {mediaList.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '60px', color: 'rgba(242,226,196,0.3)' }}>
-                  <Eye size={40} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
-                  <p>Nessun media caricato</p>
-                </div>
-              )}
             </div>
           )}
         </div>
