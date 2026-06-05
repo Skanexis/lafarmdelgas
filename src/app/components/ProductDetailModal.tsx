@@ -163,16 +163,17 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
                   fontSize: '10px',
                   fontWeight: 800,
                   letterSpacing: '1.2px',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.7)',
                   ...(product.badge === 'FROZEN'
                     ? {
-                        background: 'rgba(126,166,160,0.18)',
-                        border: '1px solid rgba(126,166,160,0.45)',
-                        color: '#7EA6A0',
+                        background: 'rgba(12,24,22,0.88)',
+                        border: '1px solid rgba(126,166,160,0.58)',
+                        color: '#d8fffb',
                       }
                     : {
-                        background: 'rgba(217,120,47,0.18)',
-                        border: '1px solid rgba(217,120,47,0.45)',
-                        color: '#D9782F',
+                        background: 'rgba(34,27,11,0.9)',
+                        border: '1px solid rgba(244,201,93,0.6)',
+                        color: '#fff1a8',
                       }),
                 }}
               >
@@ -216,7 +217,7 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
                   top: '50%',
                   transform: 'translateY(-50%)',
                   background: 'rgba(9,6,4,0.7)',
-                  border: '1px solid rgba(217,120,47,0.3)',
+                  border: '1px solid rgba(57,255,20,0.28)',
                   borderRadius: '6px',
                   width: '34px',
                   height: '34px',
@@ -224,7 +225,7 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  color: '#D9782F',
+                  color: '#d9ffd2',
                 }}
               >
                 <ChevronLeft size={18} />
@@ -241,7 +242,7 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
                   top: '50%',
                   transform: 'translateY(-50%)',
                   background: 'rgba(9,6,4,0.7)',
-                  border: '1px solid rgba(217,120,47,0.3)',
+                  border: '1px solid rgba(57,255,20,0.28)',
                   borderRadius: '6px',
                   width: '34px',
                   height: '34px',
@@ -249,7 +250,7 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
-                  color: '#D9782F',
+                  color: '#d9ffd2',
                 }}
               >
                 <ChevronRight size={18} />
@@ -272,7 +273,7 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
                       borderRadius: '6px',
                       overflow: 'hidden',
                       padding: 0,
-                      border: i === activeImage ? '2px solid #D9782F' : '2px solid rgba(255,255,255,0.1)',
+                      border: i === activeImage ? '2px solid #39ff14' : '2px solid rgba(255,255,255,0.1)',
                       opacity: i === activeImage ? 1 : 0.58,
                       cursor: 'pointer',
                     }}
@@ -315,8 +316,8 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
             )}
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '7px', minWidth: 0 }}>
-              <MapPin size={13} color="#8FA64A" />
-              <span style={{ color: '#8FA64A', fontSize: '11px', letterSpacing: '1.8px', textTransform: 'uppercase' }}>
+              <MapPin size={13} color="#d9ffd2" />
+              <span style={{ color: '#d9ffd2', fontSize: '11px', letterSpacing: '1.8px', textTransform: 'uppercase' }}>
                 {product.origin}
               </span>
               {product.isNew && (
@@ -325,9 +326,9 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
                     marginLeft: 'auto',
                     padding: '3px 8px',
                     borderRadius: '4px',
-                    background: 'rgba(143,166,74,0.14)',
-                    border: '1px solid rgba(143,166,74,0.28)',
-                    color: '#8FA64A',
+                    background: 'rgba(8,28,10,0.88)',
+                    border: '1px solid rgba(57,255,20,0.42)',
+                    color: '#d9ffd2',
                     fontSize: '9px',
                     fontWeight: 800,
                     letterSpacing: '1px',
@@ -373,7 +374,7 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
             <div>
               <p
                 style={{
-                  color: 'rgba(217,120,47,0.7)',
+                  color: 'rgba(217,255,210,0.76)',
                   fontSize: '10px',
                   letterSpacing: '2.4px',
                   textTransform: 'uppercase',
@@ -396,8 +397,8 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
                       key={weight.weight}
                       onClick={() => setSelectedWeight(weight)}
                       style={{
-                        border: selected ? '1px solid rgba(217,120,47,0.72)' : '1px solid rgba(255,255,255,0.08)',
-                        background: selected ? 'rgba(217,120,47,0.12)' : 'rgba(255,255,255,0.035)',
+                        border: selected ? '1px solid rgba(57,255,20,0.5)' : '1px solid rgba(255,255,255,0.08)',
+                        background: selected ? 'rgba(57,255,20,0.12)' : 'rgba(255,255,255,0.035)',
                         borderRadius: '6px',
                         padding: '10px',
                         cursor: 'pointer',
@@ -407,7 +408,7 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
                       <span
                         style={{
                           display: 'block',
-                          color: selected ? '#D9782F' : '#F2E2C4',
+                          color: selected ? '#d9ffd2' : '#F2E2C4',
                           fontSize: '13px',
                           fontWeight: 800,
                         }}
@@ -432,8 +433,8 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
             <div
               style={{
                 padding: '14px',
-                background: 'rgba(217,120,47,0.07)',
-                border: '1px solid rgba(217,120,47,0.24)',
+                background: 'rgba(57,255,20,0.06)',
+                border: '1px solid rgba(57,255,20,0.2)',
                 borderRadius: '6px',
                 display: 'flex',
                 alignItems: 'center',
@@ -447,7 +448,7 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
                   fontFamily: "'Montserrat', sans-serif",
                   fontWeight: 900,
                   fontSize: '22px',
-                  background: 'linear-gradient(135deg, #D9782F, #F3C66A)',
+                  background: 'linear-gradient(135deg, #39ff14, #b7ff4a 52%, #f4f4ef)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   whiteSpace: 'nowrap',
@@ -468,14 +469,15 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
                 gap: '10px',
                 padding: '14px',
                 borderRadius: '6px',
-                background: 'linear-gradient(135deg, rgba(217,120,47,0.24), rgba(143,166,74,0.14))',
-                border: '1px solid rgba(217,120,47,0.48)',
-                color: '#D9782F',
+                background: 'linear-gradient(135deg, #39ff14, #b7ff4a 58%, #e7ffd7)',
+                border: '1px solid rgba(255,255,255,0.18)',
+                color: '#020403',
                 cursor: 'pointer',
                 fontFamily: "'Montserrat', sans-serif",
                 fontWeight: 800,
                 fontSize: '13px',
                 letterSpacing: '1.5px',
+                boxShadow: '0 10px 24px rgba(0,0,0,0.22)',
               }}
             >
               <MessageCircle size={17} />

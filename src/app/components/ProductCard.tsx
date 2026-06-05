@@ -123,23 +123,24 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
               display: 'flex',
               alignItems: 'center',
                   gap: '5px',
-              padding: '5px 11px',
-              borderRadius: '4px',
-              fontSize: '11px',
-              fontWeight: 900,
-              letterSpacing: '1.5px',
-              ...(product.badge === 'FROZEN'
-                ? {
-                    background: 'rgba(126,166,160,0.16)',
-                    border: '1px solid rgba(126,166,160,0.42)',
-                    color: '#9ed8d1',
-                    boxShadow: '0 0 16px rgba(126,166,160,0.16)',
+                  padding: '5px 11px',
+                  borderRadius: '4px',
+                  fontSize: '11px',
+                  fontWeight: 900,
+                  letterSpacing: '1.5px',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.65)',
+                  ...(product.badge === 'FROZEN'
+                    ? {
+                    background: 'rgba(12,24,22,0.86)',
+                    border: '1px solid rgba(126,166,160,0.56)',
+                    color: '#d8fffb',
+                    boxShadow: '0 8px 18px rgba(0,0,0,0.34)',
                   }
                 : {
-                    background: 'rgba(244,201,93,0.16)',
-                    border: '1px solid rgba(244,201,93,0.46)',
-                    color: '#f4c95d',
-                    boxShadow: '0 0 16px rgba(244,201,93,0.16)',
+                    background: 'rgba(34,27,11,0.88)',
+                    border: '1px solid rgba(244,201,93,0.58)',
+                    color: '#fff1a8',
+                    boxShadow: '0 8px 18px rgba(0,0,0,0.34)',
                   }),
             }}
           >
@@ -158,13 +159,14 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
               right: '12px',
               padding: '4px 10px',
               borderRadius: '4px',
-              background: 'rgba(244,201,93,0.15)',
-              border: '1px solid rgba(244,201,93,0.38)',
-              color: '#f4c95d',
+              background: 'rgba(8,28,10,0.88)',
+              border: '1px solid rgba(57,255,20,0.42)',
+              color: '#d9ffd2',
               fontSize: '10px',
               fontWeight: 900,
               letterSpacing: '1px',
-              boxShadow: '0 0 16px rgba(244,201,93,0.16)',
+              textShadow: '0 1px 2px rgba(0,0,0,0.65)',
+              boxShadow: '0 8px 18px rgba(0,0,0,0.34)',
             }}
           >
             NUOVO
@@ -185,9 +187,9 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
               alignItems: 'center',
               justifyContent: 'center',
               color: '#020403',
-              background: 'linear-gradient(135deg, #f4c95d, #f7e7a6)',
+              background: 'linear-gradient(135deg, #39ff14, #b7ff4a)',
               border: '1px solid rgba(255,255,255,0.22)',
-              boxShadow: '0 0 22px rgba(244,201,93,0.26)',
+              boxShadow: '0 10px 20px rgba(0,0,0,0.26)',
             }}
           >
             <Play size={15} fill="currentColor" />
@@ -277,14 +279,14 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
                   transition: 'all 0.2s',
                   border:
                     selectedWeight.weight === w.weight
-                      ? '1px solid rgba(244,201,93,0.62)'
+                      ? '1px solid rgba(57,255,20,0.5)'
                       : '1px solid rgba(244,244,239,0.12)',
                   background:
                     selectedWeight.weight === w.weight
-                      ? 'linear-gradient(135deg, rgba(244,201,93,0.16), rgba(244,244,239,0.06))'
+                      ? 'linear-gradient(135deg, rgba(57,255,20,0.18), rgba(244,244,239,0.055))'
                       : 'rgba(255,255,255,0.035)',
-                  color: selectedWeight.weight === w.weight ? '#f4c95d' : 'rgba(244,244,239,0.56)',
-                  boxShadow: selectedWeight.weight === w.weight ? '0 0 14px rgba(244,201,93,0.12)' : 'none',
+                  color: selectedWeight.weight === w.weight ? '#d9ffd2' : 'rgba(244,244,239,0.56)',
+                  boxShadow: selectedWeight.weight === w.weight ? '0 8px 18px rgba(0,0,0,0.18)' : 'none',
                 }}
               >
                 {w.weight}
@@ -357,14 +359,14 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
               gap: '6px',
               padding: '8px 14px',
               borderRadius: '6px',
-              background: 'linear-gradient(135deg, #f4c95d, #fff1a8 58%, #d7d7ce)',
+              background: 'linear-gradient(135deg, #39ff14, #b7ff4a 58%, #e7ffd7)',
               border: '1px solid rgba(255,255,255,0.22)',
               color: '#020403',
               cursor: 'pointer',
               fontSize: '12px',
               fontWeight: 900,
               letterSpacing: '0.7px',
-              boxShadow: '0 10px 26px rgba(244,201,93,0.16)',
+              boxShadow: '0 10px 24px rgba(0,0,0,0.22)',
             }}
           >
             <ExternalLink size={13} />

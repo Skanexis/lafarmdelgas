@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { ReactNode } from 'react';
-import { Check, Copy, ExternalLink, Instagram, MessageCircle, Search, Store, Users, X } from 'lucide-react';
+import { Check, Copy, ExternalLink, Instagram, Menu, MessageCircle, Search, Store, Users, X, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Product } from '../data/products';
 import type { ContactSettings } from '../api/client';
@@ -126,6 +126,26 @@ export default function HomePage() {
         <div className="farm-scanline" aria-hidden="true" />
         <div className="farm-light farm-light-left" aria-hidden="true" />
         <div className="farm-light farm-light-right" aria-hidden="true" />
+        <div className="farm-neon-line farm-neon-line-a" aria-hidden="true" />
+        <div className="farm-neon-line farm-neon-line-b" aria-hidden="true" />
+
+        <div className="farm-topbar">
+          <div className="farm-topbrand">
+            <div className="farm-topmark">
+              {logoUrl ? <img src={logoUrl} alt="" /> : <span>LF</span>}
+            </div>
+            <span>LA FARM DEL GAS</span>
+          </div>
+
+          <button
+            type="button"
+            className="farm-menu-button"
+            aria-label="Apri canali"
+            onClick={() => openPanel('canali')}
+          >
+            <Menu size={22} />
+          </button>
+        </div>
 
         <motion.div
           className="farm-hero-inner"
@@ -134,6 +154,8 @@ export default function HomePage() {
           transition={{ duration: 0.5 }}
         >
           <div className="farm-logo-wrap">
+            <span className="farm-logo-ring farm-logo-ring-a" aria-hidden="true" />
+            <span className="farm-logo-ring farm-logo-ring-b" aria-hidden="true" />
             {logoUrl ? (
               <img className="farm-logo" src={logoUrl} alt="LA FARM DEL GAS" />
             ) : (
@@ -146,6 +168,7 @@ export default function HomePage() {
           </div>
 
           <h1>LA FARM DEL GAS</h1>
+          <p className="farm-hero-tagline">QUALITÀ PREMIUM · SELEZIONE DIRETTA · CANALI RISERVATI</p>
           <div className="farm-stars" aria-hidden="true">
             <span />
             <span />
@@ -157,7 +180,7 @@ export default function HomePage() {
           <div className="farm-actions" aria-label="Sezioni principali">
             <PanelButton
               active={activePanel === 'catalogo'}
-              icon={<Store size={20} />}
+              icon={<Zap size={20} />}
               label="CATALOGO"
               onClick={() => openPanel('catalogo')}
             />
@@ -315,9 +338,90 @@ export default function HomePage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 54px 18px 72px;
+          padding: 92px 18px 72px;
           box-sizing: border-box;
           isolation: isolate;
+        }
+
+        .farm-topbar {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 4;
+          min-height: 72px;
+          padding: 14px clamp(16px, 4vw, 34px);
+          box-sizing: border-box;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background:
+            linear-gradient(180deg, rgba(10, 10, 9, 0.96), rgba(10, 10, 9, 0.84)),
+            rgba(5, 5, 5, 0.9);
+          border-bottom: 1px solid rgba(244, 201, 93, 0.18);
+          box-shadow: 0 16px 40px rgba(0, 0, 0, 0.36);
+          backdrop-filter: blur(16px);
+        }
+
+        .farm-topbrand {
+          min-width: 0;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          color: #f4f4ef;
+          font-family: 'Montserrat', sans-serif;
+          font-size: 13px;
+          font-weight: 900;
+          letter-spacing: 1.2px;
+          text-transform: uppercase;
+        }
+
+        .farm-topmark {
+          width: 34px;
+          height: 34px;
+          border-radius: 50%;
+          overflow: visible;
+          flex: 0 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: radial-gradient(circle at 50% 38%, rgba(244, 201, 93, 0.34), rgba(5, 5, 5, 0.92));
+          border: 1px solid rgba(244, 201, 93, 0.36);
+          color: #f4c95d;
+          font-size: 10px;
+          box-shadow: 0 0 16px rgba(244, 201, 93, 0.16);
+        }
+
+        .farm-topmark img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          border-radius: 50%;
+        }
+
+        .farm-menu-button {
+          width: 48px;
+          height: 48px;
+          border-radius: 16px;
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          background:
+            radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.18), transparent 42%),
+            linear-gradient(145deg, rgba(255, 64, 64, 0.72), rgba(104, 22, 22, 0.92));
+          color: #fff6f6;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          box-shadow: 0 0 24px rgba(255, 64, 64, 0.28), 0 14px 30px rgba(0, 0, 0, 0.36);
+          transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+          animation: farmMenuPulse 2.4s ease-in-out infinite;
+        }
+
+        .farm-menu-button:hover {
+          transform: translateY(-2px);
+          filter: brightness(1.08);
+          box-shadow: 0 0 28px rgba(255, 64, 64, 0.36), 0 18px 34px rgba(0, 0, 0, 0.42);
         }
 
         .farm-hero-media {
@@ -392,8 +496,33 @@ export default function HomePage() {
           animation-delay: -2s;
         }
 
+        .farm-neon-line {
+          position: absolute;
+          z-index: -1;
+          pointer-events: none;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.9), rgba(57, 255, 20, 0.72), transparent);
+          box-shadow: 0 0 18px rgba(0, 210, 255, 0.42);
+          opacity: 0.56;
+          animation: farmNeonLine 4.8s ease-in-out infinite;
+        }
+
+        .farm-neon-line-a {
+          left: 8vw;
+          right: 18vw;
+          top: 26%;
+        }
+
+        .farm-neon-line-b {
+          left: 18vw;
+          right: 8vw;
+          bottom: 19%;
+          animation-delay: -2.2s;
+          background: linear-gradient(90deg, transparent, rgba(244, 201, 93, 0.75), rgba(0, 210, 255, 0.76), transparent);
+        }
+
         .farm-hero-inner {
-          width: min(760px, 100%);
+          width: min(620px, 100%);
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -402,17 +531,19 @@ export default function HomePage() {
 
         .farm-logo-wrap {
           position: relative;
-          width: clamp(190px, 30vw, 360px);
+          width: clamp(210px, 34vw, 380px);
           aspect-ratio: 1;
           display: flex;
           align-items: center;
           justify-content: center;
           margin-bottom: 22px;
-          border: 1px solid rgba(57, 255, 20, 0.32);
-          background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.36));
+          border-radius: 50%;
+          border: 1px solid rgba(244, 201, 93, 0.34);
+          background: radial-gradient(circle at 50% 40%, rgba(0, 210, 255, 0.16), rgba(0, 0, 0, 0.5) 58%);
           box-shadow:
-            0 0 0 8px rgba(255, 255, 255, 0.02),
-            0 0 44px rgba(57, 255, 20, 0.18),
+            0 0 0 10px rgba(255, 255, 255, 0.018),
+            0 0 72px rgba(0, 210, 255, 0.22),
+            0 0 42px rgba(244, 201, 93, 0.14),
             0 26px 90px rgba(0, 0, 0, 0.72);
           overflow: hidden;
           transform: rotate(-1deg);
@@ -427,9 +558,30 @@ export default function HomePage() {
           background: linear-gradient(120deg, transparent 15%, rgba(255,255,255,0.28), transparent 45%);
           transform: translateX(-120%);
           animation: farmShine 4.2s ease-in-out infinite;
+          z-index: 3;
+        }
+
+        .farm-logo-ring {
+          position: absolute;
+          inset: -12px;
+          border-radius: 50%;
+          pointer-events: none;
+          border: 1px solid rgba(0, 210, 255, 0.26);
+          box-shadow: 0 0 26px rgba(0, 210, 255, 0.24);
+          animation: farmRingSpin 8s linear infinite;
+        }
+
+        .farm-logo-ring-b {
+          inset: -22px;
+          border-color: rgba(57, 255, 20, 0.18);
+          box-shadow: 0 0 34px rgba(57, 255, 20, 0.16);
+          animation-duration: 12s;
+          animation-direction: reverse;
         }
 
         .farm-logo {
+          position: relative;
+          z-index: 2;
           width: 100%;
           height: 100%;
           object-fit: cover;
@@ -485,8 +637,21 @@ export default function HomePage() {
           text-shadow:
             0 1px 0 #9d9d9d,
             0 4px 22px rgba(0, 0, 0, 0.7),
-            0 0 26px rgba(57, 255, 20, 0.2);
+            0 0 26px rgba(57, 255, 20, 0.2),
+            0 0 46px rgba(0, 210, 255, 0.12);
           animation: farmTitleGlow 3.2s ease-in-out infinite alternate;
+        }
+
+        .farm-hero-tagline {
+          width: min(470px, 100%);
+          margin: 18px 0 0;
+          color: rgba(244, 244, 239, 0.62);
+          font-size: clamp(12px, 2.6vw, 15px);
+          font-weight: 800;
+          letter-spacing: 2.8px;
+          line-height: 1.55;
+          text-transform: uppercase;
+          text-shadow: 0 0 18px rgba(0, 210, 255, 0.18);
         }
 
         .farm-stars {
@@ -522,23 +687,25 @@ export default function HomePage() {
 
         .farm-actions {
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 210px));
-          gap: 12px;
-          width: min(440px, 100%);
+          grid-template-columns: 1fr;
+          gap: 14px;
+          width: min(370px, 100%);
         }
 
         .farm-action-button {
-          min-height: 56px;
+          min-height: 72px;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 10px;
-          border-radius: 8px;
-          border: 1px solid rgba(57, 255, 20, 0.38);
-          background: rgba(7, 9, 7, 0.82);
+          border-radius: 14px;
+          border: 1px solid rgba(57, 255, 20, 0.52);
+          background:
+            linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015)),
+            rgba(4, 7, 4, 0.84);
           color: #f4f4ef;
           font-family: 'Montserrat', sans-serif;
-          font-size: 14px;
+          font-size: 18px;
           font-weight: 900;
           letter-spacing: 1.4px;
           cursor: pointer;
@@ -546,6 +713,7 @@ export default function HomePage() {
           overflow: hidden;
           position: relative;
           transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
+          animation: farmButtonBreath 3.6s ease-in-out infinite;
         }
 
         .farm-action-button::after {
@@ -564,10 +732,16 @@ export default function HomePage() {
 
         .farm-action-button.active,
         .farm-action-button:hover {
-          border-color: rgba(244, 201, 93, 0.72);
-          background: linear-gradient(135deg, #39ff14, #b7ff4a 55%, #f4c95d);
-          color: #020403;
-          box-shadow: 0 0 32px rgba(57, 255, 20, 0.24), 0 20px 46px rgba(0, 0, 0, 0.46);
+          border-color: rgba(57, 255, 20, 0.68);
+          background:
+            linear-gradient(145deg, rgba(57, 255, 20, 0.18), rgba(255, 255, 255, 0.025)),
+            rgba(3, 9, 4, 0.92);
+          color: #d9ffd2;
+          box-shadow: 0 0 22px rgba(57, 255, 20, 0.14), 0 20px 46px rgba(0, 0, 0, 0.46);
+        }
+
+        .farm-action-button svg {
+          filter: drop-shadow(0 0 8px rgba(57, 255, 20, 0.22));
         }
 
         .farm-panel-anchor {
@@ -863,6 +1037,23 @@ export default function HomePage() {
           }
         }
 
+        @keyframes farmNeonLine {
+          0%, 100% {
+            transform: scaleX(0.22);
+            opacity: 0;
+          }
+          35% {
+            opacity: 0.72;
+          }
+          55% {
+            transform: scaleX(1);
+            opacity: 0.42;
+          }
+          78% {
+            opacity: 0;
+          }
+        }
+
         @keyframes farmLogoFloat {
           0%, 100% {
             transform: rotate(-1deg) translateY(0);
@@ -886,6 +1077,36 @@ export default function HomePage() {
           }
           78%, 100% {
             transform: translateX(125%);
+          }
+        }
+
+        @keyframes farmRingSpin {
+          from {
+            transform: rotate(0deg) scale(1);
+          }
+          50% {
+            transform: rotate(180deg) scale(1.035);
+          }
+          to {
+            transform: rotate(360deg) scale(1);
+          }
+        }
+
+        @keyframes farmMenuPulse {
+          0%, 100% {
+            box-shadow: 0 0 22px rgba(255, 64, 64, 0.24), 0 14px 30px rgba(0, 0, 0, 0.36);
+          }
+          50% {
+            box-shadow: 0 0 34px rgba(255, 64, 64, 0.42), 0 18px 36px rgba(0, 0, 0, 0.42);
+          }
+        }
+
+        @keyframes farmButtonBreath {
+          0%, 100% {
+            box-shadow: inset 0 0 22px rgba(255, 255, 255, 0.03), 0 18px 38px rgba(0, 0, 0, 0.38);
+          }
+          50% {
+            box-shadow: inset 0 0 28px rgba(57, 255, 20, 0.08), 0 0 24px rgba(57, 255, 20, 0.1), 0 20px 42px rgba(0, 0, 0, 0.42);
           }
         }
 
@@ -924,6 +1145,9 @@ export default function HomePage() {
           .farm-hero-grid,
           .farm-scanline,
           .farm-light,
+          .farm-neon-line,
+          .farm-logo-ring,
+          .farm-menu-button,
           .farm-logo-wrap,
           .farm-logo-wrap::before,
           .farm-hero h1,
@@ -960,7 +1184,28 @@ export default function HomePage() {
         @media (max-width: 760px) {
           .farm-hero {
             min-height: 100svh;
-            padding: 34px 14px 54px;
+            padding: 88px 14px 54px;
+          }
+
+          .farm-topbar {
+            min-height: 64px;
+            padding: 10px 14px;
+          }
+
+          .farm-topbrand {
+            font-size: 12px;
+            letter-spacing: 0.8px;
+          }
+
+          .farm-topmark {
+            width: 30px;
+            height: 30px;
+          }
+
+          .farm-menu-button {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
           }
 
           .farm-logo-wrap {
@@ -973,15 +1218,15 @@ export default function HomePage() {
           }
 
           .farm-actions {
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            grid-template-columns: 1fr;
+            gap: 12px;
           }
 
           .farm-action-button {
-            min-height: 52px;
+            min-height: 64px;
             padding: 0 10px;
-            font-size: 12px;
-            letter-spacing: 0.9px;
+            font-size: 16px;
+            letter-spacing: 1.2px;
           }
 
           .farm-panel {
