@@ -33,35 +33,37 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
   return (
     <motion.div
       className="product-card"
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.07, duration: 0.5 }}
+      initial={{ opacity: 0, y: 34, scale: 0.96, filter: 'blur(6px)' }}
+      whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ delay: Math.min(index * 0.045, 0.32), duration: 0.52, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{
-        y: -4,
-        boxShadow: '0 18px 42px rgba(0,0,0,0.42)',
+        y: -6,
+        scale: 1.012,
       }}
       style={{
         position: 'relative',
         background:
-          'linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025) 38%, rgba(2,4,3,0.92)), #050705',
+          'linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.025) 40%, rgba(10,10,9,0.96)), #070706',
         backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(57,255,20,0.22)',
+        border: '1px solid rgba(244,201,93,0.22)',
         borderRadius: '8px',
         overflow: 'hidden',
-        boxShadow: '0 16px 44px rgba(0,0,0,0.46), inset 0 1px 0 rgba(255,255,255,0.08)',
+        boxShadow: '0 16px 44px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.08)',
         display: 'flex',
         flexDirection: 'column',
       }}
     >
       <div
         aria-hidden="true"
+        className="product-card-ambient"
         style={{
           position: 'absolute',
           inset: 0,
           pointerEvents: 'none',
           background:
-            'linear-gradient(115deg, transparent 0%, rgba(57,255,20,0.08) 34%, transparent 56%), radial-gradient(circle at 18% 0%, rgba(244,201,93,0.16), transparent 34%)',
-          opacity: 0.9,
+            'linear-gradient(115deg, transparent 0%, rgba(244,201,93,0.07) 34%, transparent 56%), radial-gradient(circle at 18% 0%, rgba(244,201,93,0.13), transparent 34%)',
+          opacity: 0.8,
           zIndex: 1,
         }}
       />
@@ -72,6 +74,7 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
         style={{ position: 'relative', aspectRatio: '4/3', overflow: 'hidden', cursor: 'pointer', background: '#020403' }}
         onClick={openDetail}
       >
+        <div className="product-card-image-skeleton" aria-hidden="true" />
         <img
           src={imageError ? 'https://placehold.co/400x300/020403/39ff14?text=LA+FARM' : primaryImage}
           alt={product.name}
@@ -91,7 +94,7 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
             position: 'absolute',
             inset: 0,
             background:
-              'linear-gradient(to top, rgba(2,4,3,0.96) 0%, rgba(2,4,3,0.38) 48%, transparent 78%), linear-gradient(135deg, rgba(57,255,20,0.18), transparent 42%)',
+              'linear-gradient(to top, rgba(4,4,3,0.95) 0%, rgba(4,4,3,0.34) 48%, transparent 78%), linear-gradient(135deg, rgba(244,201,93,0.13), transparent 44%)',
           }}
         />
 
@@ -102,9 +105,9 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
             position: 'absolute',
             inset: 0,
             backgroundImage:
-              'linear-gradient(rgba(57,255,20,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(244,201,93,0.04) 1px, transparent 1px)',
+              'linear-gradient(rgba(244,201,93,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(244,244,239,0.025) 1px, transparent 1px)',
             backgroundSize: '42px 42px',
-            opacity: 0.62,
+            opacity: 0.5,
             maskImage: 'linear-gradient(to top, black, transparent 72%)',
           }}
         />
@@ -127,16 +130,16 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
               letterSpacing: '1.5px',
               ...(product.badge === 'FROZEN'
                 ? {
-                    background: 'rgba(57,255,20,0.16)',
-                    border: '1px solid rgba(57,255,20,0.48)',
-                    color: '#39ff14',
-                    boxShadow: '0 0 18px rgba(57,255,20,0.18)',
+                    background: 'rgba(126,166,160,0.16)',
+                    border: '1px solid rgba(126,166,160,0.42)',
+                    color: '#9ed8d1',
+                    boxShadow: '0 0 16px rgba(126,166,160,0.16)',
                   }
                 : {
-                    background: 'rgba(244,201,93,0.18)',
-                    border: '1px solid rgba(244,201,93,0.54)',
+                    background: 'rgba(244,201,93,0.16)',
+                    border: '1px solid rgba(244,201,93,0.46)',
                     color: '#f4c95d',
-                    boxShadow: '0 0 18px rgba(244,201,93,0.2)',
+                    boxShadow: '0 0 16px rgba(244,201,93,0.16)',
                   }),
             }}
           >
@@ -155,13 +158,13 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
               right: '12px',
               padding: '4px 10px',
               borderRadius: '4px',
-              background: 'rgba(57,255,20,0.18)',
-              border: '1px solid rgba(57,255,20,0.44)',
-              color: '#39ff14',
+              background: 'rgba(244,201,93,0.15)',
+              border: '1px solid rgba(244,201,93,0.38)',
+              color: '#f4c95d',
               fontSize: '10px',
               fontWeight: 900,
               letterSpacing: '1px',
-              boxShadow: '0 0 18px rgba(57,255,20,0.22)',
+              boxShadow: '0 0 16px rgba(244,201,93,0.16)',
             }}
           >
             NUOVO
@@ -182,9 +185,9 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
               alignItems: 'center',
               justifyContent: 'center',
               color: '#020403',
-              background: 'linear-gradient(135deg, #39ff14, #f4c95d)',
+              background: 'linear-gradient(135deg, #f4c95d, #f7e7a6)',
               border: '1px solid rgba(255,255,255,0.22)',
-              boxShadow: '0 0 24px rgba(57,255,20,0.32)',
+              boxShadow: '0 0 22px rgba(244,201,93,0.26)',
             }}
           >
             <Play size={15} fill="currentColor" />
@@ -206,7 +209,7 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
               padding: '4px 8px',
               borderRadius: '999px',
               background: 'rgba(2,4,3,0.72)',
-              border: '1px solid rgba(57,255,20,0.24)',
+              border: '1px solid rgba(244,201,93,0.24)',
             }}
           >
             <Eye size={12} />
@@ -224,13 +227,13 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
           <p
             className="product-card-origin"
             style={{
-              color: '#39ff14',
+              color: '#f4c95d',
               fontSize: '11px',
               letterSpacing: '2px',
               marginBottom: '4px',
               textTransform: 'uppercase',
               fontWeight: 900,
-              textShadow: '0 0 16px rgba(57,255,20,0.28)',
+              textShadow: '0 0 14px rgba(244,201,93,0.18)',
             }}
           >
             {product.origin}
@@ -274,14 +277,14 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
                   transition: 'all 0.2s',
                   border:
                     selectedWeight.weight === w.weight
-                      ? '1px solid rgba(57,255,20,0.72)'
+                      ? '1px solid rgba(244,201,93,0.62)'
                       : '1px solid rgba(244,244,239,0.12)',
                   background:
                     selectedWeight.weight === w.weight
-                      ? 'linear-gradient(135deg, rgba(57,255,20,0.2), rgba(244,201,93,0.12))'
+                      ? 'linear-gradient(135deg, rgba(244,201,93,0.16), rgba(244,244,239,0.06))'
                       : 'rgba(255,255,255,0.035)',
-                  color: selectedWeight.weight === w.weight ? '#39ff14' : 'rgba(244,244,239,0.56)',
-                  boxShadow: selectedWeight.weight === w.weight ? '0 0 16px rgba(57,255,20,0.14)' : 'none',
+                  color: selectedWeight.weight === w.weight ? '#f4c95d' : 'rgba(244,244,239,0.56)',
+                  boxShadow: selectedWeight.weight === w.weight ? '0 0 14px rgba(244,201,93,0.12)' : 'none',
                 }}
               >
                 {w.weight}
@@ -324,13 +327,13 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
                   <span
                     className="product-card-price"
                     style={{
-                      background: 'linear-gradient(135deg, #39ff14, #d7ff57 42%, #f4c95d)',
+                      background: 'linear-gradient(135deg, #f4c95d, #fff1a8 52%, #c6c6bd)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       fontSize: '24px',
                       fontWeight: 900,
                       fontFamily: "'Montserrat', sans-serif",
-                      filter: 'drop-shadow(0 0 12px rgba(57,255,20,0.22))',
+                      filter: 'drop-shadow(0 0 10px rgba(244,201,93,0.2))',
                     }}
                   >
                     €{selectedWeight.price}
@@ -354,14 +357,14 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
               gap: '6px',
               padding: '8px 14px',
               borderRadius: '6px',
-              background: 'linear-gradient(135deg, #39ff14, #b7ff4a 58%, #f4c95d)',
+              background: 'linear-gradient(135deg, #f4c95d, #fff1a8 58%, #d7d7ce)',
               border: '1px solid rgba(255,255,255,0.22)',
               color: '#020403',
               cursor: 'pointer',
               fontSize: '12px',
               fontWeight: 900,
               letterSpacing: '0.7px',
-              boxShadow: '0 10px 28px rgba(57,255,20,0.18)',
+              boxShadow: '0 10px 26px rgba(244,201,93,0.16)',
             }}
           >
             <ExternalLink size={13} />
