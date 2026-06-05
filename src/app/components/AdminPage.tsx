@@ -320,48 +320,66 @@ function ProductForm({
     if (!files.length) return;
 
     setUploadingMedia(true);
-    let uploadedCount = 0;
-    const failedFiles: string[] = [];
 
     try {
-      for (const file of files) {
+      const concurrency = 3;
+      const uploadedFiles: Array<{ index: number; file: MediaItem }> = [];
+      const failedFiles: string[] = [];
+      let cursor = 0;
+
+      const uploadNext = async () => {
+        const index = cursor;
+        const file = files[cursor];
+        cursor += 1;
+        if (!file) return;
+
         try {
           const uploaded = await onUploadFile(file);
-          uploadedCount += 1;
-
-          setForm(f => {
-            const nextFiles = [...(f.files || []).filter(item => item.url !== uploaded.url), uploaded];
-
-            if (uploaded.type === 'image') {
-              return {
-                ...f,
-                images: [...f.images.filter(Boolean), uploaded.url],
-                files: nextFiles,
-              };
-            }
-
-            if (uploaded.type === 'video') {
-              return {
-                ...f,
-                hasVideo: true,
-                videoUrl: uploaded.url,
-                files: nextFiles,
-              };
-            }
-
-            return {
-              ...f,
-              files: nextFiles,
-            };
-          });
+          uploadedFiles.push({ index, file: uploaded });
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Upload non riuscito';
           failedFiles.push(`${file.name}: ${message}`);
         }
-      }
 
-      if (uploadedCount) {
-        toast.success(uploadedCount === 1 ? 'File caricato' : `${uploadedCount} file caricati`);
+        await uploadNext();
+      };
+
+      await Promise.all(Array.from({ length: Math.min(concurrency, files.length) }, uploadNext));
+      const orderedUploadedFiles = uploadedFiles.sort((a, b) => a.index - b.index).map(item => item.file);
+
+      if (orderedUploadedFiles.length) {
+        setForm(f => {
+          const nextFiles = [...(f.files || [])];
+          const nextImages = [...f.images.filter(Boolean)];
+          let nextVideoUrl = f.videoUrl;
+
+          for (const uploaded of orderedUploadedFiles) {
+            const existingIndex = nextFiles.findIndex(item => item.url === uploaded.url);
+            if (existingIndex >= 0) {
+              nextFiles[existingIndex] = uploaded;
+            } else {
+              nextFiles.push(uploaded);
+            }
+
+            if (uploaded.type === 'image' && !nextImages.includes(uploaded.url)) {
+              nextImages.push(uploaded.url);
+            }
+
+            if (uploaded.type === 'video') {
+              nextVideoUrl = nextVideoUrl || uploaded.url;
+            }
+          }
+
+          return {
+            ...f,
+            images: nextImages,
+            files: nextFiles,
+            videoUrl: nextVideoUrl,
+            hasVideo: Boolean(nextVideoUrl || nextFiles.some(file => file.type === 'video')),
+          };
+        });
+
+        toast.success(orderedUploadedFiles.length === 1 ? 'File caricato' : `${orderedUploadedFiles.length} file caricati`);
       }
 
       if (failedFiles.length) {

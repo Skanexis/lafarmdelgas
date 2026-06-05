@@ -1,25 +1,47 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import type { CSSProperties } from 'react';
+import { ChevronLeft, ChevronRight, Play, X } from 'lucide-react';
+
+export interface GalleryMediaItem {
+  type: 'image' | 'video';
+  url: string;
+  label?: string;
+}
 
 interface GalleryModalProps {
-  images: string[];
+  media: GalleryMediaItem[];
   startIndex: number;
   onClose: () => void;
 }
 
-export function GalleryModal({ images, startIndex, onClose }: GalleryModalProps) {
-  const [current, setCurrent] = useState(startIndex);
+export function GalleryModal({ media, startIndex, onClose }: GalleryModalProps) {
+  const [current, setCurrent] = useState(() => Math.min(Math.max(startIndex, 0), Math.max(media.length - 1, 0)));
+  const currentItem = media[current];
+  const imagePreloads = useMemo(
+    () =>
+      [media[current - 1], currentItem, media[current + 1]].filter(
+        (item): item is GalleryMediaItem => Boolean(item && item.type === 'image'),
+      ),
+    [current, currentItem, media],
+  );
+
+  useEffect(() => {
+    setCurrent(Math.min(Math.max(startIndex, 0), Math.max(media.length - 1, 0)));
+  }, [media.length, startIndex]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
       if (e.key === 'ArrowLeft') setCurrent(c => Math.max(0, c - 1));
-      if (e.key === 'ArrowRight') setCurrent(c => Math.min(images.length - 1, c + 1));
+      if (e.key === 'ArrowRight') setCurrent(c => Math.min(media.length - 1, c + 1));
     };
+
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [images.length, onClose]);
+  }, [media.length, onClose]);
+
+  if (!currentItem) return null;
 
   return (
     <motion.div
@@ -31,7 +53,7 @@ export function GalleryModal({ images, startIndex, onClose }: GalleryModalProps)
         position: 'fixed',
         inset: 0,
         zIndex: 1000,
-        background: 'rgba(0,0,0,0.92)',
+        background: 'rgba(0,0,0,0.94)',
         backdropFilter: 'blur(12px)',
         display: 'flex',
         flexDirection: 'column',
@@ -40,9 +62,9 @@ export function GalleryModal({ images, startIndex, onClose }: GalleryModalProps)
         padding: '20px',
       }}
     >
-      {/* Close */}
       <button
         onClick={onClose}
+        aria-label="Chiudi gallery"
         style={{
           position: 'absolute',
           top: '20px',
@@ -63,100 +85,90 @@ export function GalleryModal({ images, startIndex, onClose }: GalleryModalProps)
         <X size={20} />
       </button>
 
-      {/* Main image */}
       <div
         onClick={e => e.stopPropagation()}
         style={{
           position: 'relative',
-          width: '100%',
-          maxWidth: '900px',
-          aspectRatio: '4/3',
+          width: 'min(100%, 1040px)',
+          height: 'min(72vh, 760px)',
+          minHeight: '260px',
           borderRadius: '8px',
           overflow: 'hidden',
-          border: '1px solid rgba(217,120,47,0.2)',
+          border: '1px solid rgba(57,255,20,0.24)',
+          background: '#020403',
           boxShadow: '0 24px 70px rgba(0,0,0,0.58)',
         }}
       >
         <AnimatePresence mode="wait">
-          <motion.img
-            key={current}
-            initial={{ opacity: 0, scale: 1.05 }}
+          <motion.div
+            key={`${currentItem.type}-${currentItem.url}`}
+            initial={{ opacity: 0, scale: 1.02 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.25 }}
-            src={images[current]}
-            alt={`Gallery ${current + 1}`}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            style={{ width: '100%', height: '100%' }}
+          >
+            {currentItem.type === 'video' ? (
+              <video
+                src={currentItem.url}
+                controls
+                playsInline
+                preload="auto"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  background: '#020403',
+                  display: 'block',
+                }}
+              />
+            ) : (
+              <img
+                src={currentItem.url}
+                alt={currentItem.label || `Gallery ${current + 1}`}
+                decoding="async"
+                style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+              />
+            )}
+          </motion.div>
         </AnimatePresence>
 
-        {/* Nav arrows */}
         {current > 0 && (
           <button
             onClick={() => setCurrent(c => c - 1)}
-            style={{
-              position: 'absolute',
-              left: '12px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              background: 'rgba(9,6,4,0.7)',
-              border: '1px solid rgba(217,120,47,0.3)',
-              borderRadius: '6px',
-              width: '44px',
-              height: '44px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              color: '#D9782F',
-            }}
+            aria-label="Media precedente"
+            style={navButtonStyle('left')}
           >
-            <ChevronLeft size={22} />
+            <ChevronLeft size={24} />
           </button>
         )}
-        {current < images.length - 1 && (
+        {current < media.length - 1 && (
           <button
             onClick={() => setCurrent(c => c + 1)}
-            style={{
-              position: 'absolute',
-              right: '12px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              background: 'rgba(9,6,4,0.7)',
-              border: '1px solid rgba(217,120,47,0.3)',
-              borderRadius: '6px',
-              width: '44px',
-              height: '44px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              color: '#D9782F',
-            }}
+            aria-label="Media successivo"
+            style={navButtonStyle('right')}
           >
-            <ChevronRight size={22} />
+            <ChevronRight size={24} />
           </button>
         )}
 
-        {/* Counter */}
         <div
           style={{
             position: 'absolute',
             bottom: '12px',
             right: '12px',
-            background: 'rgba(9,6,4,0.8)',
-            padding: '4px 12px',
+            background: 'rgba(2,4,3,0.82)',
+            padding: '5px 12px',
             borderRadius: '8px',
             fontSize: '13px',
-            color: 'rgba(242,226,196,0.7)',
+            color: 'rgba(244,244,239,0.76)',
           }}
         >
-          {current + 1} / {images.length}
+          {current + 1} / {media.length}
         </div>
       </div>
 
-      {/* Thumbnails */}
-      {images.length > 1 && (
+      {media.length > 1 && (
         <div
           onClick={e => e.stopPropagation()}
           style={{
@@ -164,32 +176,90 @@ export function GalleryModal({ images, startIndex, onClose }: GalleryModalProps)
             gap: '10px',
             marginTop: '16px',
             overflowX: 'auto',
-            maxWidth: '900px',
+            maxWidth: 'min(100%, 1040px)',
             padding: '4px',
           }}
         >
-          {images.map((img, i) => (
+          {media.map((item, i) => (
             <button
-              key={i}
+              key={`${item.type}-${item.url}-${i}`}
               onClick={() => setCurrent(i)}
               style={{
+                position: 'relative',
                 flexShrink: 0,
-                width: '72px',
-                height: '54px',
+                width: '76px',
+                height: '56px',
                 borderRadius: '6px',
                 overflow: 'hidden',
-                border: i === current ? '2px solid #D9782F' : '2px solid transparent',
+                border: i === current ? '2px solid #39ff14' : '2px solid transparent',
+                background: '#020403',
                 cursor: 'pointer',
-                opacity: i === current ? 1 : 0.55,
+                opacity: i === current ? 1 : 0.58,
                 transition: 'all 0.2s',
                 padding: 0,
               }}
             >
-              <img src={img} alt={`Thumb ${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              {item.type === 'video' ? (
+                <>
+                  <video
+                    src={item.url}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                  <span
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'rgba(0,0,0,0.28)',
+                      color: '#39ff14',
+                    }}
+                  >
+                    <Play size={17} fill="currentColor" />
+                  </span>
+                </>
+              ) : (
+                <img
+                  src={item.url}
+                  alt={item.label || `Thumb ${i + 1}`}
+                  loading="lazy"
+                  decoding="async"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              )}
             </button>
           ))}
         </div>
       )}
+
+      <div style={{ display: 'none' }} aria-hidden="true">
+        {imagePreloads.map(item => (
+          <img key={item.url} src={item.url} alt="" />
+        ))}
+      </div>
     </motion.div>
   );
+}
+
+function navButtonStyle(side: 'left' | 'right'): CSSProperties {
+  return {
+    position: 'absolute',
+    [side]: '12px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    background: 'rgba(2,4,3,0.72)',
+    border: '1px solid rgba(57,255,20,0.34)',
+    borderRadius: '6px',
+    width: '46px',
+    height: '46px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    color: '#39ff14',
+  };
 }

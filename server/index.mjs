@@ -1,7 +1,7 @@
 import http from 'node:http';
 import { once } from 'node:events';
 import { mkdir, readFile, readdir, stat, unlink, writeFile } from 'node:fs/promises';
-import { createWriteStream, existsSync } from 'node:fs';
+import { createReadStream, createWriteStream, existsSync } from 'node:fs';
 import { basename, dirname, extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { seedProducts } from './seed-products.mjs';
@@ -82,10 +82,83 @@ function sendJson(res, status, payload) {
 function sendBuffer(res, status, buffer, contentType) {
   res.writeHead(status, {
     'Access-Control-Allow-Origin': '*',
+    'Accept-Ranges': 'bytes',
     'Content-Type': contentType,
     'Cache-Control': 'public, max-age=31536000, immutable',
   });
   res.end(buffer);
+}
+
+async function sendUploadFile(req, res, filePath, method) {
+  const info = await stat(filePath);
+  const contentType = contentTypeForFile(filePath);
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Accept-Ranges': 'bytes',
+    'Content-Type': contentType,
+    'Cache-Control': 'public, max-age=31536000, immutable',
+  };
+
+  const range = req.headers.range;
+  if (range) {
+    const match = String(range).match(/^bytes=(\d*)-(\d*)$/);
+
+    if (!match) {
+      res.writeHead(416, {
+        ...headers,
+        'Content-Range': `bytes */${info.size}`,
+      });
+      res.end();
+      return;
+    }
+
+    let start = match[1] ? Number(match[1]) : 0;
+    let end = match[2] ? Number(match[2]) : info.size - 1;
+
+    if (!match[1] && match[2]) {
+      const suffixLength = Number(match[2]);
+      start = Math.max(info.size - suffixLength, 0);
+      end = info.size - 1;
+    }
+
+    if (Number.isNaN(start) || Number.isNaN(end) || start > end || start >= info.size) {
+      res.writeHead(416, {
+        ...headers,
+        'Content-Range': `bytes */${info.size}`,
+      });
+      res.end();
+      return;
+    }
+
+    end = Math.min(end, info.size - 1);
+    const chunkSize = end - start + 1;
+
+    res.writeHead(206, {
+      ...headers,
+      'Content-Length': chunkSize,
+      'Content-Range': `bytes ${start}-${end}/${info.size}`,
+    });
+
+    if (method === 'HEAD') {
+      res.end();
+      return;
+    }
+
+    createReadStream(filePath, { start, end }).pipe(res);
+    return;
+  }
+
+  res.writeHead(200, {
+    ...headers,
+    'Content-Length': info.size,
+  });
+
+  if (method === 'HEAD') {
+    res.end();
+    return;
+  }
+
+  createReadStream(filePath).pipe(res);
 }
 
 function parseBody(req) {
@@ -356,7 +429,7 @@ async function handleRequest(req, res) {
     return;
   }
 
-  if (path.startsWith('/uploads/') && method === 'GET') {
+  if (path.startsWith('/uploads/') && (method === 'GET' || method === 'HEAD')) {
     const relativePath = decodeURIComponent(path.replace('/uploads/', ''));
     const filePath = normalize(join(uploadsDir, relativePath));
 
@@ -365,7 +438,7 @@ async function handleRequest(req, res) {
       return;
     }
 
-    sendBuffer(res, 200, await readFile(filePath), contentTypeForFile(filePath));
+    await sendUploadFile(req, res, filePath, method);
     return;
   }
 

@@ -19,6 +19,7 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
   const numericWeights = product.weights.filter(w => w.price !== 'pvt');
   const pvtWeights = product.weights.filter(w => w.price === 'pvt');
   const primaryImage = resolveMediaUrl(product.images[0]);
+  const mediaCount = getProductMediaCount(product);
   const openDetail = () => {
     if (onOpenDetail) {
       onOpenDetail(product);
@@ -133,7 +134,7 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
         )}
 
         {/* Image count */}
-        {product.images.length + (product.videoUrl ? 1 : 0) > 1 && (
+        {mediaCount > 1 && (
           <div
             style={{
               position: 'absolute',
@@ -147,7 +148,7 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
             }}
           >
             <Eye size={12} />
-            {product.images.length + (product.videoUrl ? 1 : 0)}
+            {mediaCount}
           </div>
         )}
       </div>
@@ -298,4 +299,24 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
       </div>
     </motion.div>
   );
+}
+
+function getProductMediaCount(product: Product) {
+  const mediaUrls = new Set<string>();
+
+  for (const file of product.files || []) {
+    if ((file.type === 'image' || file.type === 'video') && file.url) {
+      mediaUrls.add(resolveMediaUrl(file.url));
+    }
+  }
+
+  for (const image of product.images || []) {
+    if (image) mediaUrls.add(resolveMediaUrl(image));
+  }
+
+  if (product.videoUrl) {
+    mediaUrls.add(resolveMediaUrl(product.videoUrl));
+  }
+
+  return mediaUrls.size;
 }

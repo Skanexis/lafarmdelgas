@@ -4,6 +4,7 @@ import {
   ChevronLeft,
   ChevronRight,
   MessageCircle,
+  Play,
   Snowflake,
   Star,
   MapPin,
@@ -13,6 +14,7 @@ import {
 import type { Product } from '../data/products';
 import { resolveMediaUrl } from '../api/client';
 import { GalleryModal } from './GalleryModal';
+import type { GalleryMediaItem } from './GalleryModal';
 
 interface ProductDetailModalProps {
   product: Product;
@@ -25,8 +27,13 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
   const [selectedWeight, setSelectedWeight] = useState(product.weights[0]);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryStart, setGalleryStart] = useState(0);
-  const imageUrls = product.images.map(resolveMediaUrl);
-  const videoUrl = resolveMediaUrl(product.videoUrl);
+  const productMedia = buildProductMedia(product);
+  const activeMedia = productMedia[activeImage] || productMedia[0];
+
+  useEffect(() => {
+    setActiveImage(0);
+    setGalleryOpen(false);
+  }, [product.id]);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -79,18 +86,34 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
             boxShadow: '0 24px 70px rgba(0,0,0,0.62)',
           }}
         >
-          <div style={{ position: 'relative', aspectRatio: '4/3', overflow: 'hidden', borderRadius: '10px 10px 0 0' }}>
+          <div style={{ position: 'relative', aspectRatio: '4/3', overflow: 'hidden', borderRadius: '10px 10px 0 0', background: '#020403' }}>
             <AnimatePresence mode="wait">
-              <motion.img
-                key={activeImage}
-                initial={{ opacity: 0, scale: 1.04 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.24 }}
-                src={imageUrls[activeImage]}
-                alt={product.name}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+              {activeMedia?.type === 'video' ? (
+                <motion.video
+                  key={activeMedia.url}
+                  initial={{ opacity: 0, scale: 1.04 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.24 }}
+                  src={activeMedia.url}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#020403', display: 'block' }}
+                />
+              ) : (
+                <motion.img
+                  key={activeMedia?.url || activeImage}
+                  initial={{ opacity: 0, scale: 1.04 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.24 }}
+                  src={activeMedia?.url}
+                  alt={product.name}
+                  decoding="async"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              )}
             </AnimatePresence>
 
             <div
@@ -184,7 +207,7 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
             {activeImage > 0 && (
               <button
                 onClick={() => setActiveImage(i => i - 1)}
-                aria-label="Immagine precedente"
+                aria-label="Media precedente"
                 style={{
                   position: 'absolute',
                   left: '10px',
@@ -206,10 +229,10 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
               </button>
             )}
 
-            {activeImage < product.images.length - 1 && (
+            {activeImage < productMedia.length - 1 && (
               <button
                 onClick={() => setActiveImage(i => i + 1)}
-                aria-label="Immagine successiva"
+                aria-label="Media successivo"
                 style={{
                   position: 'absolute',
                   right: '10px',
@@ -233,13 +256,14 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
           </div>
 
           <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {imageUrls.length > 1 && (
+            {productMedia.length > 1 && (
               <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '2px' }}>
-                {imageUrls.map((image, i) => (
+                {productMedia.map((item, i) => (
                   <button
-                    key={image}
+                    key={`${item.type}-${item.url}`}
                     onClick={() => setActiveImage(i)}
                     style={{
+                      position: 'relative',
                       flexShrink: 0,
                       width: '56px',
                       height: '42px',
@@ -251,33 +275,40 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
                       cursor: 'pointer',
                     }}
                   >
-                    <img src={image} alt={`Thumb ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {item.type === 'video' ? (
+                      <>
+                        <video
+                          src={item.url}
+                          muted
+                          playsInline
+                          preload="metadata"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', background: '#090604' }}
+                        />
+                        <span
+                          style={{
+                            position: 'absolute',
+                            inset: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: 'rgba(0,0,0,0.32)',
+                            color: '#39ff14',
+                          }}
+                        >
+                          <Play size={13} fill="currentColor" />
+                        </span>
+                      </>
+                    ) : (
+                      <img
+                        src={item.url}
+                        alt={`Thumb ${i + 1}`}
+                        loading="lazy"
+                        decoding="async"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    )}
                   </button>
                 ))}
-              </div>
-            )}
-
-            {videoUrl && (
-              <div
-                style={{
-                  border: '1px solid rgba(217,120,47,0.22)',
-                  borderRadius: '6px',
-                  overflow: 'hidden',
-                  background: 'rgba(9,6,4,0.56)',
-                }}
-              >
-                <video
-                  src={videoUrl}
-                  controls
-                  playsInline
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    aspectRatio: '16/9',
-                    objectFit: 'cover',
-                    background: '#090604',
-                  }}
-                />
               </div>
             )}
 
@@ -454,7 +485,7 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
 
       <AnimatePresence>
         {galleryOpen && (
-          <GalleryModal images={imageUrls} startIndex={galleryStart} onClose={() => setGalleryOpen(false)} />
+          <GalleryModal media={productMedia} startIndex={galleryStart} onClose={() => setGalleryOpen(false)} />
         )}
       </AnimatePresence>
 
@@ -468,4 +499,31 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
       `}</style>
     </>
   );
+}
+
+function buildProductMedia(product: Product): GalleryMediaItem[] {
+  const media: GalleryMediaItem[] = [];
+  const seen = new Set<string>();
+
+  const add = (type: 'image' | 'video', url?: string, label?: string) => {
+    if (!url) return;
+    const resolvedUrl = resolveMediaUrl(url);
+    if (!resolvedUrl || seen.has(resolvedUrl)) return;
+    seen.add(resolvedUrl);
+    media.push({ type, url: resolvedUrl, label });
+  };
+
+  for (const file of product.files || []) {
+    if (file.type === 'image' || file.type === 'video') {
+      add(file.type, file.url, file.originalName || file.name);
+    }
+  }
+
+  for (const image of product.images || []) {
+    add('image', image, product.name);
+  }
+
+  add('video', product.videoUrl, `${product.name} video`);
+
+  return media;
 }
