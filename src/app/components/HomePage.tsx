@@ -123,6 +123,9 @@ export default function HomePage() {
         {heroMediaUrl && <img className="farm-hero-media" src={heroMediaUrl} alt="" />}
         <div className="farm-hero-shade" />
         <div className="farm-hero-grid" />
+        <div className="farm-scanline" aria-hidden="true" />
+        <div className="farm-light farm-light-left" aria-hidden="true" />
+        <div className="farm-light farm-light-right" aria-hidden="true" />
 
         <motion.div
           className="farm-hero-inner"
@@ -301,6 +304,11 @@ export default function HomePage() {
           overflow-x: hidden;
         }
 
+        .farm-onepage::selection {
+          background: rgba(57, 255, 20, 0.34);
+          color: #ffffff;
+        }
+
         .farm-hero {
           min-height: 100svh;
           position: relative;
@@ -321,6 +329,7 @@ export default function HomePage() {
           opacity: 0.42;
           filter: saturate(1.1) contrast(1.08);
           z-index: -3;
+          animation: farmHeroDrift 16s ease-in-out infinite alternate;
         }
 
         .farm-hero-shade {
@@ -341,6 +350,46 @@ export default function HomePage() {
           background-size: 74px 74px;
           mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
           z-index: -1;
+          animation: farmGridSlide 14s linear infinite;
+        }
+
+        .farm-scanline {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: -20%;
+          height: 22%;
+          z-index: -1;
+          pointer-events: none;
+          background: linear-gradient(180deg, transparent, rgba(57, 255, 20, 0.08), transparent);
+          filter: blur(1px);
+          animation: farmScan 5.8s ease-in-out infinite;
+        }
+
+        .farm-light {
+          position: absolute;
+          width: min(34vw, 420px);
+          aspect-ratio: 1;
+          border-radius: 50%;
+          z-index: -1;
+          pointer-events: none;
+          filter: blur(28px);
+          opacity: 0.36;
+          mix-blend-mode: screen;
+          animation: farmPulseGlow 4.8s ease-in-out infinite;
+        }
+
+        .farm-light-left {
+          left: -12vw;
+          bottom: 14vh;
+          background: radial-gradient(circle, rgba(57, 255, 20, 0.72), transparent 64%);
+        }
+
+        .farm-light-right {
+          right: -14vw;
+          top: 18vh;
+          background: radial-gradient(circle, rgba(244, 201, 93, 0.56), transparent 66%);
+          animation-delay: -2s;
         }
 
         .farm-hero-inner {
@@ -352,6 +401,7 @@ export default function HomePage() {
         }
 
         .farm-logo-wrap {
+          position: relative;
           width: clamp(190px, 30vw, 360px);
           aspect-ratio: 1;
           display: flex;
@@ -366,6 +416,17 @@ export default function HomePage() {
             0 26px 90px rgba(0, 0, 0, 0.72);
           overflow: hidden;
           transform: rotate(-1deg);
+          animation: farmLogoFloat 4.8s ease-in-out infinite;
+        }
+
+        .farm-logo-wrap::before {
+          content: "";
+          position: absolute;
+          inset: -2px;
+          pointer-events: none;
+          background: linear-gradient(120deg, transparent 15%, rgba(255,255,255,0.28), transparent 45%);
+          transform: translateX(-120%);
+          animation: farmShine 4.2s ease-in-out infinite;
         }
 
         .farm-logo {
@@ -425,6 +486,7 @@ export default function HomePage() {
             0 1px 0 #9d9d9d,
             0 4px 22px rgba(0, 0, 0, 0.7),
             0 0 26px rgba(57, 255, 20, 0.2);
+          animation: farmTitleGlow 3.2s ease-in-out infinite alternate;
         }
 
         .farm-stars {
@@ -439,6 +501,23 @@ export default function HomePage() {
           clip-path: polygon(50% 0%, 61% 34%, 98% 34%, 68% 55%, 79% 91%, 50% 70%, 21% 91%, 32% 55%, 2% 34%, 39% 34%);
           background: linear-gradient(145deg, #fff2a6, #f4c95d 45%, #a66817);
           box-shadow: 0 0 16px rgba(244, 201, 93, 0.32);
+          animation: farmStarPop 1.9s ease-in-out infinite;
+        }
+
+        .farm-stars span:nth-child(2) {
+          animation-delay: 0.12s;
+        }
+
+        .farm-stars span:nth-child(3) {
+          animation-delay: 0.24s;
+        }
+
+        .farm-stars span:nth-child(4) {
+          animation-delay: 0.36s;
+        }
+
+        .farm-stars span:nth-child(5) {
+          animation-delay: 0.48s;
         }
 
         .farm-actions {
@@ -464,7 +543,23 @@ export default function HomePage() {
           letter-spacing: 1.4px;
           cursor: pointer;
           box-shadow: inset 0 0 22px rgba(255, 255, 255, 0.03), 0 18px 38px rgba(0, 0, 0, 0.38);
-          transition: border-color 0.2s, background 0.2s, color 0.2s;
+          overflow: hidden;
+          position: relative;
+          transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
+        }
+
+        .farm-action-button::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(110deg, transparent 0%, rgba(255,255,255,0.26) 44%, transparent 62%);
+          transform: translateX(-120%);
+          transition: transform 0.55s ease;
+        }
+
+        .farm-action-button:hover::after,
+        .farm-action-button.active::after {
+          transform: translateX(120%);
         }
 
         .farm-action-button.active,
@@ -472,6 +567,7 @@ export default function HomePage() {
           border-color: rgba(244, 201, 93, 0.72);
           background: linear-gradient(135deg, #39ff14, #b7ff4a 55%, #f4c95d);
           color: #020403;
+          box-shadow: 0 0 32px rgba(57, 255, 20, 0.24), 0 20px 46px rgba(0, 0, 0, 0.46);
         }
 
         .farm-panel-anchor {
@@ -499,6 +595,7 @@ export default function HomePage() {
           font-weight: 900;
           letter-spacing: 3px;
           text-transform: uppercase;
+          text-shadow: 0 0 16px rgba(57, 255, 20, 0.36);
         }
 
         .farm-section-head h2 {
@@ -509,6 +606,7 @@ export default function HomePage() {
           font-weight: 900;
           letter-spacing: 0;
           color: #f4f4ef;
+          text-shadow: 0 0 30px rgba(57, 255, 20, 0.16);
         }
 
         .farm-controls {
@@ -608,6 +706,7 @@ export default function HomePage() {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 18px;
+          perspective: 1200px;
         }
 
         .farm-contact-grid {
@@ -628,6 +727,17 @@ export default function HomePage() {
             linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)),
             rgba(2, 4, 3, 0.82);
           box-shadow: 0 22px 54px rgba(0, 0, 0, 0.42);
+          transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+        }
+
+        .farm-contact-card:hover {
+          transform: translateY(-4px);
+          border-color: color-mix(in srgb, var(--card-color) 82%, white);
+          box-shadow: 0 0 34px color-mix(in srgb, var(--card-color) 18%, transparent), 0 26px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .farm-contact-card:hover .farm-contact-icon {
+          animation: farmIconHit 0.42s ease;
         }
 
         .farm-contact-top {
@@ -648,6 +758,7 @@ export default function HomePage() {
           border: 1px solid var(--card-color);
           background: color-mix(in srgb, var(--card-color) 15%, transparent);
           color: var(--card-color);
+          transition: transform 0.22s ease, box-shadow 0.22s ease;
         }
 
         .farm-contact-card p {
@@ -707,6 +818,124 @@ export default function HomePage() {
           justify-content: center;
           color: rgba(244, 244, 239, 0.7);
           background: rgba(255, 255, 255, 0.05);
+        }
+
+        @keyframes farmHeroDrift {
+          from {
+            transform: scale(1.02) translate3d(-0.8%, -0.6%, 0);
+          }
+          to {
+            transform: scale(1.08) translate3d(0.8%, 0.6%, 0);
+          }
+        }
+
+        @keyframes farmGridSlide {
+          from {
+            background-position: 0 0, 0 0;
+          }
+          to {
+            background-position: 74px 74px, 74px 74px;
+          }
+        }
+
+        @keyframes farmScan {
+          0%, 52%, 100% {
+            transform: translateY(-18vh);
+            opacity: 0;
+          }
+          62% {
+            opacity: 0.72;
+          }
+          78% {
+            transform: translateY(118vh);
+            opacity: 0;
+          }
+        }
+
+        @keyframes farmPulseGlow {
+          0%, 100% {
+            transform: scale(0.92);
+            opacity: 0.22;
+          }
+          50% {
+            transform: scale(1.08);
+            opacity: 0.42;
+          }
+        }
+
+        @keyframes farmLogoFloat {
+          0%, 100% {
+            transform: rotate(-1deg) translateY(0);
+            box-shadow:
+              0 0 0 8px rgba(255, 255, 255, 0.02),
+              0 0 44px rgba(57, 255, 20, 0.18),
+              0 26px 90px rgba(0, 0, 0, 0.72);
+          }
+          50% {
+            transform: rotate(0.6deg) translateY(-8px);
+            box-shadow:
+              0 0 0 8px rgba(255, 255, 255, 0.03),
+              0 0 68px rgba(57, 255, 20, 0.3),
+              0 34px 110px rgba(0, 0, 0, 0.78);
+          }
+        }
+
+        @keyframes farmShine {
+          0%, 58% {
+            transform: translateX(-125%);
+          }
+          78%, 100% {
+            transform: translateX(125%);
+          }
+        }
+
+        @keyframes farmTitleGlow {
+          from {
+            filter: drop-shadow(0 0 0 rgba(57, 255, 20, 0));
+          }
+          to {
+            filter: drop-shadow(0 0 18px rgba(57, 255, 20, 0.18));
+          }
+        }
+
+        @keyframes farmStarPop {
+          0%, 100% {
+            transform: translateY(0) scale(1);
+          }
+          50% {
+            transform: translateY(-2px) scale(1.08);
+          }
+        }
+
+        @keyframes farmIconHit {
+          0% {
+            transform: scale(1) rotate(0);
+          }
+          45% {
+            transform: scale(1.12) rotate(-5deg);
+          }
+          100% {
+            transform: scale(1) rotate(0);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .farm-hero-media,
+          .farm-hero-grid,
+          .farm-scanline,
+          .farm-light,
+          .farm-logo-wrap,
+          .farm-logo-wrap::before,
+          .farm-hero h1,
+          .farm-stars span {
+            animation: none !important;
+          }
+
+          .farm-action-button,
+          .farm-contact-card,
+          .farm-contact-icon {
+            transition: none !important;
+          }
         }
 
         @media (min-width: 720px) {

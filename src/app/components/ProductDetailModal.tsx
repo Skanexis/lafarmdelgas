@@ -57,12 +57,13 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 900,
-          background: 'rgba(9,6,4,0.78)',
-          backdropFilter: 'blur(8px)',
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 900,
+          background:
+            'radial-gradient(circle at 50% 18%, rgba(57,255,20,0.16), transparent 34%), radial-gradient(circle at 78% 72%, rgba(244,201,93,0.12), transparent 30%), rgba(2,4,3,0.84)',
+          backdropFilter: 'blur(10px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -80,10 +81,11 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
             width: 'clamp(340px, 30vw, 480px)',
             maxHeight: '86vh',
             overflowY: 'auto',
-            background: 'rgba(18,12,7,0.96)',
-            border: '1px solid rgba(217,120,47,0.22)',
+            background:
+              'linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025) 34%, rgba(2,4,3,0.98)), #050705',
+            border: '1px solid rgba(57,255,20,0.28)',
             borderRadius: '10px',
-            boxShadow: '0 24px 70px rgba(0,0,0,0.62)',
+            boxShadow: '0 0 44px rgba(57,255,20,0.14), 0 28px 84px rgba(0,0,0,0.72)',
           }}
         >
           <div style={{ position: 'relative', aspectRatio: '4/3', overflow: 'hidden', borderRadius: '10px 10px 0 0', background: '#020403' }}>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { ExternalLink, Snowflake, Star, Eye } from 'lucide-react';
+import { ExternalLink, Snowflake, Star, Eye, Play } from 'lucide-react';
 import type { Product } from '../data/products';
 import { resolveMediaUrl } from '../api/client';
 
@@ -20,6 +20,7 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
   const pvtWeights = product.weights.filter(w => w.price === 'pvt');
   const primaryImage = resolveMediaUrl(product.images[0]);
   const mediaCount = getProductMediaCount(product);
+  const hasVideo = Boolean(product.videoUrl || product.files?.some(file => file.type === 'video'));
   const openDetail = () => {
     if (onOpenDetail) {
       onOpenDetail(product);
@@ -40,23 +41,39 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
         boxShadow: '0 18px 42px rgba(0,0,0,0.42)',
       }}
       style={{
-        background: 'rgba(18,12,7,0.88)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(217,120,47,0.22)',
+        position: 'relative',
+        background:
+          'linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025) 38%, rgba(2,4,3,0.92)), #050705',
+        backdropFilter: 'blur(12px)',
+        border: '1px solid rgba(57,255,20,0.22)',
         borderRadius: '8px',
         overflow: 'hidden',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+        boxShadow: '0 16px 44px rgba(0,0,0,0.46), inset 0 1px 0 rgba(255,255,255,0.08)',
         display: 'flex',
         flexDirection: 'column',
       }}
     >
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          background:
+            'linear-gradient(115deg, transparent 0%, rgba(57,255,20,0.08) 34%, transparent 56%), radial-gradient(circle at 18% 0%, rgba(244,201,93,0.16), transparent 34%)',
+          opacity: 0.9,
+          zIndex: 1,
+        }}
+      />
+
       {/* Image */}
       <div
-        style={{ position: 'relative', aspectRatio: '4/3', overflow: 'hidden', cursor: 'pointer' }}
+        className="product-card-media"
+        style={{ position: 'relative', aspectRatio: '4/3', overflow: 'hidden', cursor: 'pointer', background: '#020403' }}
         onClick={openDetail}
       >
         <img
-          src={imageError ? 'https://placehold.co/400x300/1a1a1a/333?text=No+Image' : primaryImage}
+          src={imageError ? 'https://placehold.co/400x300/020403/39ff14?text=LA+FARM' : primaryImage}
           alt={product.name}
           onError={() => setImageError(true)}
           style={{
@@ -73,7 +90,22 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
           style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(to top, rgba(9,6,4,0.9) 0%, transparent 60%)',
+            background:
+              'linear-gradient(to top, rgba(2,4,3,0.96) 0%, rgba(2,4,3,0.38) 48%, transparent 78%), linear-gradient(135deg, rgba(57,255,20,0.18), transparent 42%)',
+          }}
+        />
+
+        <div
+          className="product-card-grid-glow"
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage:
+              'linear-gradient(rgba(57,255,20,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(244,201,93,0.04) 1px, transparent 1px)',
+            backgroundSize: '42px 42px',
+            opacity: 0.62,
+            maskImage: 'linear-gradient(to top, black, transparent 72%)',
           }}
         />
 
@@ -87,22 +119,24 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
               left: '12px',
               display: 'flex',
               alignItems: 'center',
-              gap: '5px',
-              padding: '5px 12px',
+                  gap: '5px',
+              padding: '5px 11px',
               borderRadius: '4px',
               fontSize: '11px',
-              fontWeight: 700,
+              fontWeight: 900,
               letterSpacing: '1.5px',
               ...(product.badge === 'FROZEN'
                 ? {
-                    background: 'rgba(126,166,160,0.2)',
-                    border: '1px solid rgba(126,166,160,0.5)',
-                    color: '#7EA6A0',
+                    background: 'rgba(57,255,20,0.16)',
+                    border: '1px solid rgba(57,255,20,0.48)',
+                    color: '#39ff14',
+                    boxShadow: '0 0 18px rgba(57,255,20,0.18)',
                   }
                 : {
-                    background: 'rgba(217,120,47,0.2)',
-                    border: '1px solid rgba(217,120,47,0.5)',
-                    color: '#D9782F',
+                    background: 'rgba(244,201,93,0.18)',
+                    border: '1px solid rgba(244,201,93,0.54)',
+                    color: '#f4c95d',
+                    boxShadow: '0 0 18px rgba(244,201,93,0.2)',
                   }),
             }}
           >
@@ -121,15 +155,39 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
               right: '12px',
               padding: '4px 10px',
               borderRadius: '4px',
-              background: 'rgba(143,166,74,0.2)',
-              border: '1px solid rgba(143,166,74,0.4)',
-              color: '#8FA64A',
+              background: 'rgba(57,255,20,0.18)',
+              border: '1px solid rgba(57,255,20,0.44)',
+              color: '#39ff14',
               fontSize: '10px',
-              fontWeight: 700,
+              fontWeight: 900,
               letterSpacing: '1px',
+              boxShadow: '0 0 18px rgba(57,255,20,0.22)',
             }}
           >
             NUOVO
+          </div>
+        )}
+
+        {hasVideo && (
+          <div
+            className="product-card-play"
+            style={{
+              position: 'absolute',
+              bottom: '10px',
+              left: '10px',
+              width: '34px',
+              height: '34px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#020403',
+              background: 'linear-gradient(135deg, #39ff14, #f4c95d)',
+              border: '1px solid rgba(255,255,255,0.22)',
+              boxShadow: '0 0 24px rgba(57,255,20,0.32)',
+            }}
+          >
+            <Play size={15} fill="currentColor" />
           </div>
         )}
 
@@ -143,8 +201,12 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
               display: 'flex',
               alignItems: 'center',
               gap: '4px',
-              color: 'rgba(255,255,255,0.7)',
+              color: 'rgba(244,244,239,0.78)',
               fontSize: '11px',
+              padding: '4px 8px',
+              borderRadius: '999px',
+              background: 'rgba(2,4,3,0.72)',
+              border: '1px solid rgba(57,255,20,0.24)',
             }}
           >
             <Eye size={12} />
@@ -154,16 +216,21 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
       </div>
 
       {/* Content */}
-      <div className="product-card-content" style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
+      <div
+        className="product-card-content"
+        style={{ position: 'relative', zIndex: 2, padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}
+      >
         <div onClick={openDetail} style={{ cursor: 'pointer' }}>
           <p
             className="product-card-origin"
             style={{
-              color: '#F3C66A',
+              color: '#39ff14',
               fontSize: '11px',
               letterSpacing: '2px',
               marginBottom: '4px',
               textTransform: 'uppercase',
+              fontWeight: 900,
+              textShadow: '0 0 16px rgba(57,255,20,0.28)',
             }}
           >
             {product.origin}
@@ -171,23 +238,25 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
           <h3
             className="product-card-title"
             style={{
-              color: '#F2E2C4',
+              color: '#f4f4ef',
               fontFamily: "'Montserrat', sans-serif",
-              fontWeight: 700,
-              fontSize: '15px',
-              letterSpacing: '0.5px',
+              fontWeight: 900,
+              fontSize: '16px',
+              letterSpacing: 0,
               marginBottom: '2px',
               lineHeight: 1.3,
+              textTransform: 'uppercase',
+              textShadow: '0 10px 26px rgba(0,0,0,0.42)',
             }}
           >
             {product.name}
           </h3>
-          <p className="product-card-brand" style={{ color: 'rgba(242,226,196,0.45)', fontSize: '12px' }}>{product.brand}</p>
+          <p className="product-card-brand" style={{ color: 'rgba(244,244,239,0.48)', fontSize: '12px', fontWeight: 700 }}>{product.brand}</p>
         </div>
 
         {/* Weight selector */}
         <div>
-          <p className="product-card-weight-label" style={{ color: 'rgba(242,226,196,0.4)', fontSize: '11px', marginBottom: '8px', letterSpacing: '1px' }}>
+          <p className="product-card-weight-label" style={{ color: 'rgba(244,201,93,0.7)', fontSize: '10px', marginBottom: '8px', letterSpacing: '1.8px', fontWeight: 900 }}>
             SELEZIONA QUANTITÀ
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
@@ -205,13 +274,14 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
                   transition: 'all 0.2s',
                   border:
                     selectedWeight.weight === w.weight
-                      ? '1px solid #D9782F'
-                      : '1px solid rgba(217,120,47,0.2)',
+                      ? '1px solid rgba(57,255,20,0.72)'
+                      : '1px solid rgba(244,244,239,0.12)',
                   background:
                     selectedWeight.weight === w.weight
-                      ? 'rgba(217,120,47,0.2)'
-                      : 'rgba(255,255,255,0.03)',
-                  color: selectedWeight.weight === w.weight ? '#D9782F' : 'rgba(242,226,196,0.5)',
+                      ? 'linear-gradient(135deg, rgba(57,255,20,0.2), rgba(244,201,93,0.12))'
+                      : 'rgba(255,255,255,0.035)',
+                  color: selectedWeight.weight === w.weight ? '#39ff14' : 'rgba(244,244,239,0.56)',
+                  boxShadow: selectedWeight.weight === w.weight ? '0 0 16px rgba(57,255,20,0.14)' : 'none',
                 }}
               >
                 {w.weight}
@@ -224,10 +294,11 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
                   padding: '5px 12px',
                   borderRadius: '6px',
                   fontSize: '11px',
-                  border: '1px solid rgba(123,74,136,0.3)',
-                  background: 'rgba(123,74,136,0.08)',
-                  color: '#7B4A88',
+                  border: '1px solid rgba(244,201,93,0.32)',
+                  background: 'rgba(244,201,93,0.08)',
+                  color: '#f4c95d',
                   letterSpacing: '0.5px',
+                  fontWeight: 900,
                 }}
               >
                 +bulk
@@ -253,17 +324,18 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
                   <span
                     className="product-card-price"
                     style={{
-                      background: 'linear-gradient(135deg, #D9782F, #F3C66A)',
+                      background: 'linear-gradient(135deg, #39ff14, #d7ff57 42%, #f4c95d)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       fontSize: '24px',
-                      fontWeight: 800,
+                      fontWeight: 900,
                       fontFamily: "'Montserrat', sans-serif",
+                      filter: 'drop-shadow(0 0 12px rgba(57,255,20,0.22))',
                     }}
                   >
                     €{selectedWeight.price}
                   </span>
-                  <span style={{ color: 'rgba(242,226,196,0.4)', fontSize: '12px' }}>
+                  <span style={{ color: 'rgba(244,244,239,0.42)', fontSize: '12px' }}>
                     / {selectedWeight.weight}
                   </span>
                 </div>
@@ -271,7 +343,7 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
             </motion.div>
           </AnimatePresence>
 
-          <motion.button
+            <motion.button
             className="product-card-detail-button"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -282,14 +354,14 @@ export function ProductCard({ product, index, onOpenDetail }: ProductCardProps) 
               gap: '6px',
               padding: '8px 14px',
               borderRadius: '6px',
-              background: '#D9782F',
-              border: '1px solid rgba(217,120,47,0.4)',
-              color: '#090604',
+              background: 'linear-gradient(135deg, #39ff14, #b7ff4a 58%, #f4c95d)',
+              border: '1px solid rgba(255,255,255,0.22)',
+              color: '#020403',
               cursor: 'pointer',
               fontSize: '12px',
-              fontWeight: 600,
-              letterSpacing: '0.5px',
-              boxShadow: 'none',
+              fontWeight: 900,
+              letterSpacing: '0.7px',
+              boxShadow: '0 10px 28px rgba(57,255,20,0.18)',
             }}
           >
             <ExternalLink size={13} />
