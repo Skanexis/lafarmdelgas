@@ -33,43 +33,25 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          minHeight: 'calc(100vh - 73px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'rgba(242,226,196,0.5)',
-        }}
-      >
-        <p style={{ fontSize: '18px' }}>Caricamento prodotto...</p>
+      <div className="fluent-state-page">
+        <p>Caricamento...</p>
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div
-        style={{
-          minHeight: 'calc(100vh - 73px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexDirection: 'column',
-          gap: '16px',
-          color: 'rgba(242,226,196,0.5)',
-        }}
-      >
-        <p style={{ fontSize: '24px' }}>Prodotto non trovato</p>
-        <Link to="/vetrina" style={{ color: '#D9782F', textDecoration: 'none', fontSize: '14px' }}>
-          Torna alla vetrina
+      <div className="fluent-state-page">
+        <p>Prodotto non trovato</p>
+        <Link to="/vetrina">
+          Catalogo
         </Link>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: 'calc(100vh - 73px)' }}>
+    <div className="fluent-detail-route">
       <ProductDetailModal
         product={product}
         onClose={() => navigate('/vetrina')}

@@ -1,12 +1,13 @@
 {
-  "name": "la-farm-del-gas",
+  "name": "terps-dragon",
   "private": true,
   "version": "0.0.1",
   "type": "module",
   "scripts": {
     "build": "vite build",
     "dev": "vite",
-    "backend": "node server/index.mjs"
+    "backend": "node server/index.mjs",
+    "bot": "node server/bot.mjs"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",

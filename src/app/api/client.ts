@@ -17,6 +17,14 @@ export interface ContactSettings {
   instagramUrl: string;
 }
 
+export interface BotSettings {
+  requiredChat: string;
+  joinUrl: string;
+  enabled: boolean;
+  botConfigured?: boolean;
+  webAppConfigured?: boolean;
+}
+
 export interface MediaItem {
   name: string;
   originalName?: string;
@@ -44,9 +52,10 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     let message = `API request failed: ${response.status}`;
+    let payload: Record<string, unknown> | null = null;
 
     try {
-      const payload = await response.json();
+      payload = await response.json();
       if (payload?.error) {
         message = String(payload.error);
       }
@@ -57,7 +66,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     }
 
     const error = new Error(message);
-    Object.assign(error, { status: response.status });
+    Object.assign(error, { status: response.status, payload });
     throw error;
   }
 
@@ -82,6 +91,13 @@ export function fetchSettings() {
 
 export function fetchContacts() {
   return request<ContactSettings>('/contacts');
+}
+
+export function verifyTelegramSession(initData: string) {
+  return request<{ ok: boolean; user: { id: number; first_name?: string; username?: string } }>('/telegram/session', {
+    method: 'POST',
+    body: JSON.stringify({ initData }),
+  });
 }
 
 export function resolveMediaUrl(url?: string) {
@@ -163,6 +179,20 @@ export function updateAdminContacts(token: string, contacts: ContactSettings) {
     method: 'PUT',
     headers: adminHeaders(token),
     body: JSON.stringify(contacts),
+  });
+}
+
+export function fetchAdminBotSettings(token: string) {
+  return request<BotSettings>('/admin/bot-settings', {
+    headers: adminHeaders(token),
+  });
+}
+
+export function updateAdminBotSettings(token: string, settings: BotSettings) {
+  return request<BotSettings>('/admin/bot-settings', {
+    method: 'PUT',
+    headers: adminHeaders(token),
+    body: JSON.stringify(settings),
   });
 }
 

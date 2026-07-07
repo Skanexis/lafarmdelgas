@@ -45,6 +45,7 @@ export function GalleryModal({ media, startIndex, onClose }: GalleryModalProps) 
 
   return (
     <motion.div
+      className="gallery-modal-overlay"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -63,22 +64,23 @@ export function GalleryModal({ media, startIndex, onClose }: GalleryModalProps) 
       }}
     >
       <button
+        className="gallery-modal-close"
         onClick={onClose}
         aria-label="Chiudi gallery"
         style={{
           position: 'absolute',
           top: '20px',
           right: '20px',
-          background: 'rgba(255,255,255,0.1)',
-          border: 'none',
-          borderRadius: '6px',
+          background: 'rgba(18,18,18,0.82)',
+          border: '1px solid rgba(255,255,255,0.14)',
+          borderRadius: '8px',
           width: '44px',
           height: '44px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
-          color: '#F2E2C4',
+          color: '#f5f5f5',
           zIndex: 10,
         }}
       >
@@ -86,6 +88,7 @@ export function GalleryModal({ media, startIndex, onClose }: GalleryModalProps) 
       </button>
 
       <div
+        className="gallery-modal-stage"
         onClick={e => e.stopPropagation()}
         style={{
           position: 'relative',
@@ -94,8 +97,8 @@ export function GalleryModal({ media, startIndex, onClose }: GalleryModalProps) 
           minHeight: '260px',
           borderRadius: '8px',
           overflow: 'hidden',
-          border: '1px solid rgba(57,255,20,0.24)',
-          background: '#020403',
+          border: '1px solid rgba(232,17,35,0.34)',
+          background: '#050505',
           boxShadow: '0 24px 70px rgba(0,0,0,0.58)',
         }}
       >
@@ -118,7 +121,7 @@ export function GalleryModal({ media, startIndex, onClose }: GalleryModalProps) 
                   width: '100%',
                   height: '100%',
                   objectFit: 'contain',
-                  background: '#020403',
+                  background: '#050505',
                   display: 'block',
                 }}
               />
@@ -135,6 +138,7 @@ export function GalleryModal({ media, startIndex, onClose }: GalleryModalProps) 
 
         {current > 0 && (
           <button
+            className="gallery-modal-nav gallery-modal-nav-prev"
             onClick={() => setCurrent(c => c - 1)}
             aria-label="Media precedente"
             style={navButtonStyle('left')}
@@ -144,6 +148,7 @@ export function GalleryModal({ media, startIndex, onClose }: GalleryModalProps) 
         )}
         {current < media.length - 1 && (
           <button
+            className="gallery-modal-nav gallery-modal-nav-next"
             onClick={() => setCurrent(c => c + 1)}
             aria-label="Media successivo"
             style={navButtonStyle('right')}
@@ -157,11 +162,11 @@ export function GalleryModal({ media, startIndex, onClose }: GalleryModalProps) 
             position: 'absolute',
             bottom: '12px',
             right: '12px',
-            background: 'rgba(2,4,3,0.82)',
+            background: 'rgba(18,18,18,0.82)',
             padding: '5px 12px',
             borderRadius: '8px',
             fontSize: '13px',
-            color: 'rgba(244,244,239,0.76)',
+            color: 'rgba(245,245,245,0.76)',
           }}
         >
           {current + 1} / {media.length}
@@ -170,6 +175,7 @@ export function GalleryModal({ media, startIndex, onClose }: GalleryModalProps) 
 
       {media.length > 1 && (
         <div
+          className="gallery-modal-thumbs"
           onClick={e => e.stopPropagation()}
           style={{
             display: 'flex',
@@ -182,6 +188,7 @@ export function GalleryModal({ media, startIndex, onClose }: GalleryModalProps) 
         >
           {media.map((item, i) => (
             <button
+              className="gallery-modal-thumb"
               key={`${item.type}-${item.url}-${i}`}
               onClick={() => setCurrent(i)}
               style={{
@@ -189,10 +196,10 @@ export function GalleryModal({ media, startIndex, onClose }: GalleryModalProps) 
                 flexShrink: 0,
                 width: '76px',
                 height: '56px',
-                borderRadius: '6px',
+                borderRadius: '8px',
                 overflow: 'hidden',
-                border: i === current ? '2px solid #39ff14' : '2px solid transparent',
-                background: '#020403',
+                border: i === current ? '2px solid #ff3347' : '2px solid transparent',
+                background: '#050505',
                 cursor: 'pointer',
                 opacity: i === current ? 1 : 0.58,
                 transition: 'all 0.2s',
@@ -216,7 +223,7 @@ export function GalleryModal({ media, startIndex, onClose }: GalleryModalProps) 
                       alignItems: 'center',
                       justifyContent: 'center',
                       background: 'rgba(0,0,0,0.28)',
-                      color: '#39ff14',
+                      color: '#ff3347',
                     }}
                   >
                     <Play size={17} fill="currentColor" />
@@ -241,6 +248,64 @@ export function GalleryModal({ media, startIndex, onClose }: GalleryModalProps) 
           <img key={item.url} src={item.url} alt="" />
         ))}
       </div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .gallery-modal-overlay {
+            padding: 12px !important;
+          }
+
+          .gallery-modal-close {
+            top: max(12px, env(safe-area-inset-top)) !important;
+            right: 12px !important;
+            width: 40px !important;
+            height: 40px !important;
+          }
+
+          .gallery-modal-stage {
+            width: 100% !important;
+            height: min(66svh, 560px) !important;
+            min-height: 220px !important;
+            border-radius: 8px !important;
+          }
+
+          .gallery-modal-nav {
+            width: 40px !important;
+            height: 40px !important;
+          }
+
+          .gallery-modal-nav-prev {
+            left: 8px !important;
+          }
+
+          .gallery-modal-nav-next {
+            right: 8px !important;
+          }
+
+          .gallery-modal-thumbs {
+            width: 100% !important;
+            max-width: 100% !important;
+            gap: 8px !important;
+            padding: 4px 2px !important;
+          }
+
+          .gallery-modal-thumb {
+            width: 64px !important;
+            height: 48px !important;
+          }
+        }
+
+        @media (max-width: 360px) {
+          .gallery-modal-stage {
+            height: min(60svh, 500px) !important;
+          }
+
+          .gallery-modal-thumb {
+            width: 58px !important;
+            height: 44px !important;
+          }
+        }
+      `}</style>
     </motion.div>
   );
 }
@@ -252,14 +317,14 @@ function navButtonStyle(side: 'left' | 'right'): CSSProperties {
     top: '50%',
     transform: 'translateY(-50%)',
     background: 'rgba(2,4,3,0.72)',
-    border: '1px solid rgba(57,255,20,0.34)',
-    borderRadius: '6px',
+    border: '1px solid rgba(232,17,35,0.38)',
+    borderRadius: '8px',
     width: '46px',
     height: '46px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
-    color: '#39ff14',
+    color: '#f5f5f5',
   };
 }

@@ -36,3 +36,15 @@ server/uploads
 ```
 
 Эти папки не коммитятся в Git и должны бэкапиться отдельно.
+
+Для Telegram Mini App в `.env` также нужны:
+
+```env
+TELEGRAM_BOT_TOKEN=...
+TELEGRAM_WEBAPP_URL=https://lafarmdelgas.com
+TELEGRAM_ADMIN_IDS=123456789
+BOT_REQUIRED_CHANNEL=-1001234567890
+BOT_JOIN_URL=https://t.me/+private_channel_invite
+BOT_REQUIRE_SUBSCRIPTION=true
+VITE_TELEGRAM_GATE=true
+```

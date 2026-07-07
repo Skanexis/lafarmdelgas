@@ -18,6 +18,7 @@ import {
   Upload,
   Video,
   MessageCircle,
+  Bot,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Product, WeightPrice } from '../data/products';
@@ -26,30 +27,40 @@ import {
   createAdminProduct,
   deleteAdminCategory,
   deleteAdminProduct,
+  fetchAdminBotSettings,
   fetchCategories,
   fetchContacts,
   fetchProducts,
   fetchSettings,
   resolveMediaUrl,
   updateAdminContacts,
+  updateAdminBotSettings,
   updateAdminSettings,
   updateAdminCategory,
   updateAdminProduct,
   uploadAdminFile,
   verifyAdminSession,
 } from '../api/client';
-import type { ContactSettings, MediaItem, SiteSettings } from '../api/client';
+import type { BotSettings, ContactSettings, MediaItem, SiteSettings } from '../api/client';
 
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASS || 'lafarm2026';
 
 const defaultContacts: ContactSettings = {
-  whatsappGroupName: 'LA FARM DEL GAS',
+  whatsappGroupName: 'TERPS DRAGON',
   whatsappGroupUrl: 'https://chat.whatsapp.com/',
   whatsappContactLabel: '+39 333 000 0000',
   whatsappContactUrl: 'https://wa.me/393330000000',
-  instagramLabel: '@lafarmdelgas',
-  instagramUrl: 'https://instagram.com/lafarmdelgas',
+  instagramLabel: '@terpsdragon',
+  instagramUrl: 'https://instagram.com/terpsdragon',
+};
+
+const defaultBotSettings: BotSettings = {
+  requiredChat: '',
+  joinUrl: '',
+  enabled: true,
+  botConfigured: false,
+  webAppConfigured: false,
 };
 
 function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
@@ -82,12 +93,12 @@ function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
     width: '100%',
     padding: '13px 16px',
     background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(217,120,47,0.2)',
+    border: '1px solid rgba(232,17,35,0.2)',
     borderRadius: '6px',
-    color: '#F2E2C4',
+    color: '#f5f5f5',
     fontSize: '14px',
     outline: 'none',
-    fontFamily: "'Poppins', sans-serif",
+    fontFamily: "'Segoe UI', system-ui, sans-serif",
     boxSizing: 'border-box',
     transition: 'border-color 0.2s',
   };
@@ -104,22 +115,6 @@ function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
         overflow: 'hidden',
       }}
     >
-      {/* Background orb */}
-      <div
-        style={{
-          position: 'absolute',
-          width: '400px',
-          height: '400px',
-          borderRadius: '6px',
-          background: '#7B4A88',
-          filter: 'blur(120px)',
-          opacity: 0.15,
-          top: '20%',
-          left: '30%',
-          pointerEvents: 'none',
-        }}
-      />
-
       <motion.div
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -128,7 +123,7 @@ function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
           maxWidth: '420px',
           background: 'rgba(255,255,255,0.04)',
           backdropFilter: 'blur(30px)',
-          border: '1px solid rgba(123,74,136,0.3)',
+          border: '1px solid rgba(255,51,71,0.3)',
           borderRadius: '6px',
           padding: '44px 36px',
           boxShadow: '0 24px 70px rgba(0,0,0,0.48)',
@@ -142,23 +137,23 @@ function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
               width: '64px',
               height: '64px',
               borderRadius: '6px',
-              background: 'rgba(123,74,136,0.15)',
-              border: '1px solid rgba(123,74,136,0.4)',
+              background: 'rgba(255,51,71,0.15)',
+              border: '1px solid rgba(255,51,71,0.4)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               margin: '0 auto 16px',
             }}
           >
-            <Lock size={26} color="#7B4A88" />
+            <Lock size={26} color="#ff3347" />
           </div>
           <h1
             style={{
-              fontFamily: "'Montserrat', sans-serif",
+              fontFamily: "'Segoe UI', system-ui, sans-serif",
               fontWeight: 800,
               fontSize: '22px',
               letterSpacing: '2px',
-              background: 'linear-gradient(135deg, #7B4A88, #D9782F)',
+              background: 'linear-gradient(135deg, #ff3347, #e81123)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               marginBottom: '6px',
@@ -166,14 +161,14 @@ function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
           >
             ADMIN PANEL
           </h1>
-          <p style={{ color: 'rgba(242,226,196,0.35)', fontSize: '12px', letterSpacing: '1px' }}>
-            LA FARM DEL GAS — Gestione contenuti
+          <p style={{ color: 'rgba(245,245,245,0.35)', fontSize: '12px', letterSpacing: '1px' }}>
+            TERPS DRAGON — Gestione contenuti
           </p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
-            <label style={{ display: 'block', color: 'rgba(242,226,196,0.5)', fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '7px' }}>
+            <label style={{ display: 'block', color: 'rgba(245,245,245,0.5)', fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '7px' }}>
               Username
             </label>
             <input
@@ -182,12 +177,12 @@ function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
               onChange={e => setUser(e.target.value)}
               placeholder="admin"
               style={inputStyle}
-              onFocus={e => (e.target.style.borderColor = 'rgba(123,74,136,0.6)')}
-              onBlur={e => (e.target.style.borderColor = 'rgba(217,120,47,0.2)')}
+              onFocus={e => (e.target.style.borderColor = 'rgba(255,51,71,0.6)')}
+              onBlur={e => (e.target.style.borderColor = 'rgba(232,17,35,0.2)')}
             />
           </div>
           <div>
-            <label style={{ display: 'block', color: 'rgba(242,226,196,0.5)', fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '7px' }}>
+            <label style={{ display: 'block', color: 'rgba(245,245,245,0.5)', fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '7px' }}>
               Password
             </label>
             <input
@@ -196,13 +191,13 @@ function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
               onChange={e => setPass(e.target.value)}
               placeholder="••••••••"
               style={inputStyle}
-              onFocus={e => (e.target.style.borderColor = 'rgba(123,74,136,0.6)')}
-              onBlur={e => (e.target.style.borderColor = 'rgba(217,120,47,0.2)')}
+              onFocus={e => (e.target.style.borderColor = 'rgba(255,51,71,0.6)')}
+              onBlur={e => (e.target.style.borderColor = 'rgba(232,17,35,0.2)')}
             />
           </div>
 
           {error && (
-            <p style={{ color: '#FF6B6B', fontSize: '13px', textAlign: 'center' }}>{error}</p>
+            <p style={{ color: '#ff5a68', fontSize: '13px', textAlign: 'center' }}>{error}</p>
           )}
 
           <motion.button
@@ -213,11 +208,11 @@ function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
             style={{
               marginTop: '8px',
               padding: '14px',
-              borderRadius: '13px',
-              border: '1px solid rgba(123,74,136,0.5)',
-              background: 'linear-gradient(135deg, rgba(123,74,136,0.3), rgba(123,74,136,0.15))',
-              color: '#7B4A88',
-              fontFamily: "'Montserrat', sans-serif",
+              borderRadius: '8px',
+              border: '1px solid rgba(255,51,71,0.5)',
+              background: 'linear-gradient(135deg, rgba(255,51,71,0.3), rgba(255,51,71,0.15))',
+              color: '#ff3347',
+              fontFamily: "'Segoe UI', system-ui, sans-serif",
               fontWeight: 800,
               fontSize: '14px',
               letterSpacing: '2px',
@@ -229,7 +224,7 @@ function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
             }}
           >
             {loading ? (
-              <div style={{ width: '16px', height: '16px', borderRadius: '6px', border: '2px solid rgba(123,74,136,0.3)', borderTopColor: '#7B4A88', animation: 'spin 0.8s linear infinite' }} />
+              <div style={{ width: '16px', height: '16px', borderRadius: '6px', border: '2px solid rgba(255,51,71,0.3)', borderTopColor: '#ff3347', animation: 'spin 0.8s linear infinite' }} />
             ) : (
               <Lock size={15} />
             )}
@@ -237,7 +232,7 @@ function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
           </motion.button>
         </form>
 
-        <p style={{ textAlign: 'center', color: 'rgba(242,226,196,0.2)', fontSize: '11px', marginTop: '24px' }}>
+        <p style={{ textAlign: 'center', color: 'rgba(245,245,245,0.2)', fontSize: '11px', marginTop: '24px' }}>
           Demo: admin / lafarm2026
         </p>
       </motion.div>
@@ -429,18 +424,18 @@ function ProductForm({
     width: '100%',
     padding: '10px 14px',
     background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(217,120,47,0.2)',
+    border: '1px solid rgba(232,17,35,0.2)',
     borderRadius: '6px',
-    color: '#F2E2C4',
+    color: '#f5f5f5',
     fontSize: '13px',
     outline: 'none',
-    fontFamily: "'Poppins', sans-serif",
+    fontFamily: "'Segoe UI', system-ui, sans-serif",
     boxSizing: 'border-box',
   };
 
   const labelStyle: React.CSSProperties = {
     display: 'block',
-    color: 'rgba(242,226,196,0.45)',
+    color: 'rgba(245,245,245,0.45)',
     fontSize: '11px',
     letterSpacing: '1.5px',
     textTransform: 'uppercase',
@@ -454,7 +449,7 @@ function ProductForm({
       animate={{ opacity: 1, x: 0 }}
       style={{
         background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(217,120,47,0.15)',
+        border: '1px solid rgba(232,17,35,0.15)',
         borderRadius: '8px',
         padding: '28px',
         display: 'flex',
@@ -463,10 +458,10 @@ function ProductForm({
       }}
     >
       <div className="admin-form-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h3 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: '16px', color: '#D9782F', letterSpacing: '1px' }}>
+        <h3 style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", fontWeight: 800, fontSize: '16px', color: '#e81123', letterSpacing: '1px' }}>
           {form.id ? 'Modifica Prodotto' : 'Nuovo Prodotto'}
         </h3>
-        <button onClick={onCancel} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(242,226,196,0.4)' }}>
+        <button onClick={onCancel} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(245,245,245,0.4)' }}>
           <X size={20} />
         </button>
       </div>
@@ -493,7 +488,7 @@ function ProductForm({
             style={{ ...inputStyle, cursor: 'pointer' }}
           >
             {categories.map(category => (
-              <option key={category} value={category} style={{ background: '#17100A' }}>
+              <option key={category} value={category} style={{ background: '#141414' }}>
                 {category}
               </option>
             ))}
@@ -506,9 +501,9 @@ function ProductForm({
             onChange={e => setForm(f => ({ ...f, badge: (e.target.value as 'FROZEN' | 'TOP' | null) || null }))}
             style={{ ...inputStyle, cursor: 'pointer' }}
           >
-            <option value="" style={{ background: '#17100A' }}>Nessuno</option>
-            <option value="TOP" style={{ background: '#17100A' }}>TOP</option>
-            <option value="FROZEN" style={{ background: '#17100A' }}>FROZEN</option>
+            <option value="" style={{ background: '#141414' }}>Nessuno</option>
+            <option value="TOP" style={{ background: '#141414' }}>TOP</option>
+            <option value="FROZEN" style={{ background: '#141414' }}>FROZEN</option>
           </select>
         </div>
         <div style={{ gridColumn: '1 / -1' }}>
@@ -523,7 +518,7 @@ function ProductForm({
 
         {/* Checkboxes */}
         <div className="admin-checkbox-row" style={{ display: 'flex', gap: '20px', gridColumn: '1 / -1' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: 'rgba(242,226,196,0.6)', fontSize: '13px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: 'rgba(245,245,245,0.6)', fontSize: '13px' }}>
             <input type="checkbox" checked={form.isNew} onChange={e => setForm(f => ({ ...f, isNew: e.target.checked }))} />
             Nuovo prodotto
           </label>
@@ -536,7 +531,7 @@ function ProductForm({
           <label style={labelStyle}>Pesi e prezzi</label>
           <button
             onClick={addWeight}
-            style={{ background: 'rgba(143,166,74,0.1)', border: '1px solid rgba(143,166,74,0.3)', borderRadius: '8px', padding: '4px 10px', color: '#8FA64A', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+            style={{ background: 'rgba(232,17,35,0.1)', border: '1px solid rgba(232,17,35,0.3)', borderRadius: '8px', padding: '4px 10px', color: '#ff3347', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
           >
             <Plus size={12} /> Aggiungi
           </button>
@@ -577,9 +572,9 @@ function ProductForm({
             gap: '8px',
             padding: '13px',
             borderRadius: '6px',
-            border: '1px dashed rgba(217,120,47,0.38)',
-            background: 'rgba(217,120,47,0.06)',
-            color: '#D9782F',
+            border: '1px dashed rgba(232,17,35,0.38)',
+            background: 'rgba(232,17,35,0.06)',
+            color: '#e81123',
             cursor: uploadingMedia ? 'not-allowed' : 'pointer',
             fontSize: '13px',
             fontWeight: 700,
@@ -630,13 +625,13 @@ function ProductForm({
                       width: '42px',
                       height: '32px',
                       borderRadius: '6px',
-                      background: 'rgba(217,120,47,0.08)',
-                      border: '1px solid rgba(217,120,47,0.16)',
+                      background: 'rgba(232,17,35,0.08)',
+                      border: '1px solid rgba(232,17,35,0.16)',
                       overflow: 'hidden',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: '#D9782F',
+                      color: '#e81123',
                       flexShrink: 0,
                     }}
                   >
@@ -653,10 +648,10 @@ function ProductForm({
                     )}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ color: '#F2E2C4', fontSize: '12px', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <p style={{ color: '#f5f5f5', fontSize: '12px', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {label}
                     </p>
-                    <p style={{ color: 'rgba(242,226,196,0.36)', fontSize: '11px' }}>
+                    <p style={{ color: 'rgba(245,245,245,0.36)', fontSize: '11px' }}>
                       {file.type.toUpperCase()}{formatFileSize(file.size) ? ` · ${formatFileSize(file.size)}` : ''}
                     </p>
                   </div>
@@ -672,7 +667,7 @@ function ProductForm({
             })}
           </div>
         ) : (
-          <p style={{ color: 'rgba(242,226,196,0.36)', fontSize: '12px', marginTop: '8px' }}>
+          <p style={{ color: 'rgba(245,245,245,0.36)', fontSize: '12px', marginTop: '8px' }}>
             Carica almeno una foto per mostrare il prodotto in vetrina.
           </p>
         )}
@@ -682,7 +677,7 @@ function ProductForm({
       <div className="admin-form-actions" style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
         <button
           onClick={onCancel}
-          style={{ padding: '10px 20px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'none', color: 'rgba(242,226,196,0.5)', cursor: 'pointer', fontSize: '13px' }}
+          style={{ padding: '10px 20px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', background: 'none', color: 'rgba(245,245,245,0.5)', cursor: 'pointer', fontSize: '13px' }}
         >
           Annulla
         </button>
@@ -693,9 +688,9 @@ function ProductForm({
           disabled={saving}
           style={{
             padding: '10px 24px', borderRadius: '6px',
-            border: '1px solid rgba(217,120,47,0.4)',
-            background: 'linear-gradient(135deg, rgba(217,120,47,0.2), rgba(217,120,47,0.1))',
-            color: '#D9782F', cursor: saving ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: 700,
+            border: '1px solid rgba(232,17,35,0.4)',
+            background: 'linear-gradient(135deg, rgba(232,17,35,0.2), rgba(232,17,35,0.1))',
+            color: '#e81123', cursor: saving ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: 700,
             display: 'flex', alignItems: 'center', gap: '6px',
             opacity: saving ? 0.7 : 1,
           }}
@@ -714,10 +709,11 @@ export default function AdminPage() {
   const [search, setSearch] = useState('');
   const [editingProduct, setEditingProduct] = useState<FormProduct | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [activeTab, setActiveTab] = useState<'brand' | 'products' | 'contacts' | 'categories'>('products');
+  const [activeTab, setActiveTab] = useState<'brand' | 'products' | 'contacts' | 'bot' | 'categories'>('products');
   const [categoryList, setCategoryList] = useState<string[]>([]);
   const [settings, setSettings] = useState<SiteSettings>({ logoUrl: '', heroMediaUrl: '' });
   const [contacts, setContacts] = useState<ContactSettings>(defaultContacts);
+  const [botSettings, setBotSettings] = useState<BotSettings>(defaultBotSettings);
   const [newCategory, setNewCategory] = useState('');
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [editingCategoryName, setEditingCategoryName] = useState('');
@@ -727,6 +723,7 @@ export default function AdminPage() {
   const [savingProduct, setSavingProduct] = useState(false);
   const [savingCategory, setSavingCategory] = useState(false);
   const [savingContacts, setSavingContacts] = useState(false);
+  const [savingBotSettings, setSavingBotSettings] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
 
   useEffect(() => {
@@ -753,11 +750,12 @@ export default function AdminPage() {
         fetchCategories(),
         fetchSettings(),
         fetchContacts(),
+        fetchAdminBotSettings(adminToken),
       ]);
 
       if (!active) return;
 
-      const [productsResult, categoriesResult, settingsResult, contactsResult] = results;
+      const [productsResult, categoriesResult, settingsResult, contactsResult, botSettingsResult] = results;
       const failed: string[] = [];
 
       if (productsResult.status === 'fulfilled') {
@@ -782,6 +780,12 @@ export default function AdminPage() {
         setContacts(contactsResult.value);
       } else {
         failed.push('contatti');
+      }
+
+      if (botSettingsResult.status === 'fulfilled') {
+        setBotSettings(botSettingsResult.value);
+      } else {
+        failed.push('telegram');
       }
 
       if (failed.length) {
@@ -903,6 +907,20 @@ export default function AdminPage() {
     }
   };
 
+  const handleSaveBotSettings = async () => {
+    setSavingBotSettings(true);
+
+    try {
+      const updated = await updateAdminBotSettings(adminToken, botSettings);
+      setBotSettings(updated);
+      toast.success('Telegram aggiornato');
+    } catch {
+      toast.error('Salvataggio Telegram non riuscito');
+    } finally {
+      setSavingBotSettings(false);
+    }
+  };
+
   const handleCreateCategory = async () => {
     const name = newCategory.trim();
     if (!name) return;
@@ -958,6 +976,7 @@ export default function AdminPage() {
     { key: 'brand', label: 'Brand', icon: <Settings size={17} /> },
     { key: 'products', label: 'Prodotti', icon: <Package size={17} /> },
     { key: 'contacts', label: 'Contatti', icon: <MessageCircle size={17} /> },
+    { key: 'bot', label: 'Telegram', icon: <Bot size={17} /> },
     { key: 'categories', label: 'Categorie', icon: <Tags size={17} /> },
   ];
 
@@ -967,8 +986,8 @@ export default function AdminPage() {
       <div
         className="admin-topbar"
         style={{
-          background: 'rgba(18,12,7,0.95)',
-          borderBottom: '1px solid rgba(123,74,136,0.2)',
+          background: 'rgba(18,18,18,0.95)',
+          borderBottom: '1px solid rgba(255,51,71,0.2)',
           padding: '0 24px',
           display: 'flex',
           alignItems: 'center',
@@ -981,8 +1000,8 @@ export default function AdminPage() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <Leaf size={18} color="#7B4A88" />
-          <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: '14px', letterSpacing: '2px', color: '#7B4A88' }}>
+          <Leaf size={18} color="#ff3347" />
+          <span style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", fontWeight: 800, fontSize: '14px', letterSpacing: '2px', color: '#ff3347' }}>
             PANNELLO ADMIN
           </span>
         </div>
@@ -1008,7 +1027,7 @@ export default function AdminPage() {
           className="admin-sidebar"
           style={{
             width: '200px',
-            background: 'rgba(9,6,4,0.6)',
+            background: 'rgba(8,8,8,0.6)',
             borderRight: '1px solid rgba(255,255,255,0.06)',
             padding: '24px 12px',
             display: 'flex',
@@ -1026,10 +1045,10 @@ export default function AdminPage() {
                 display: 'flex', alignItems: 'center', gap: '10px',
                 padding: '10px 14px', borderRadius: '6px', cursor: 'pointer',
                 border: 'none', width: '100%', textAlign: 'left',
-                background: activeTab === item.key ? 'rgba(123,74,136,0.15)' : 'transparent',
-                color: activeTab === item.key ? '#7B4A88' : 'rgba(242,226,196,0.45)',
+                background: activeTab === item.key ? 'rgba(255,51,71,0.15)' : 'transparent',
+                color: activeTab === item.key ? '#ff3347' : 'rgba(245,245,245,0.45)',
                 fontSize: '13px', fontWeight: 600, transition: 'all 0.2s',
-                fontFamily: "'Poppins', sans-serif",
+                fontFamily: "'Segoe UI', system-ui, sans-serif",
               }}
             >
               {item.icon}
@@ -1039,14 +1058,14 @@ export default function AdminPage() {
 
           {/* Stats */}
           <div className="admin-stats" style={{ marginTop: 'auto', padding: '16px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <p style={{ color: 'rgba(242,226,196,0.3)', fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '10px' }}>Statistiche</p>
+            <p style={{ color: 'rgba(245,245,245,0.3)', fontSize: '10px', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '10px' }}>Statistiche</p>
             {[
-              { label: 'Prodotti', value: productList.length, color: '#D9782F' },
-              { label: 'TOP', value: productList.filter(p => p.badge === 'TOP').length, color: '#D9782F' },
-              { label: 'FROZEN', value: productList.filter(p => p.badge === 'FROZEN').length, color: '#7EA6A0' },
+              { label: 'Prodotti', value: productList.length, color: '#e81123' },
+              { label: 'TOP', value: productList.filter(p => p.badge === 'TOP').length, color: '#e81123' },
+              { label: 'FROZEN', value: productList.filter(p => p.badge === 'FROZEN').length, color: '#6b6b6b' },
             ].map(stat => (
               <div key={stat.label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span style={{ color: 'rgba(242,226,196,0.4)', fontSize: '12px' }}>{stat.label}</span>
+                <span style={{ color: 'rgba(245,245,245,0.4)', fontSize: '12px' }}>{stat.label}</span>
                 <span style={{ color: stat.color, fontWeight: 700, fontSize: '13px' }}>{stat.value}</span>
               </div>
             ))}
@@ -1078,9 +1097,9 @@ export default function AdminPage() {
                 style={{
                   padding: '8px 12px',
                   borderRadius: '6px',
-                  border: '1px solid rgba(217,120,47,0.35)',
-                  background: 'rgba(217,120,47,0.12)',
-                  color: '#D9782F',
+                  border: '1px solid rgba(232,17,35,0.35)',
+                  background: 'rgba(232,17,35,0.12)',
+                  color: '#e81123',
                   cursor: 'pointer',
                   fontWeight: 800,
                   fontSize: '12px',
@@ -1093,7 +1112,7 @@ export default function AdminPage() {
 
           {activeTab === 'brand' && (
             <div>
-              <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '2px', color: '#F2E2C4', marginBottom: '24px' }}>
+              <h2 style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '2px', color: '#f5f5f5', marginBottom: '24px' }}>
                 BRAND E LOGO
               </h2>
 
@@ -1109,7 +1128,7 @@ export default function AdminPage() {
                 <div
                   style={{
                     background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(217,120,47,0.16)',
+                    border: '1px solid rgba(232,17,35,0.16)',
                     borderRadius: '8px',
                     padding: '18px',
                   }}
@@ -1118,13 +1137,13 @@ export default function AdminPage() {
                     style={{
                       aspectRatio: '1',
                       borderRadius: '50%',
-                      border: '1px solid rgba(243,198,106,0.32)',
-                      background: 'rgba(9,6,4,0.62)',
+                      border: '1px solid rgba(232,17,35,0.32)',
+                      background: 'rgba(8,8,8,0.62)',
                       overflow: 'hidden',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: 'rgba(242,226,196,0.35)',
+                      color: 'rgba(245,245,245,0.35)',
                     }}
                   >
                     {settings.logoUrl ? (
@@ -1142,7 +1161,7 @@ export default function AdminPage() {
                 <div
                   style={{
                     background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(217,120,47,0.16)',
+                    border: '1px solid rgba(232,17,35,0.16)',
                     borderRadius: '8px',
                     padding: '22px',
                     display: 'flex',
@@ -1150,8 +1169,8 @@ export default function AdminPage() {
                     gap: '14px',
                   }}
                 >
-                  <p style={{ color: '#F2E2C4', fontWeight: 800, fontSize: '15px' }}>Logo homepage</p>
-                  <p style={{ color: 'rgba(242,226,196,0.48)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>
+                  <p style={{ color: '#f5f5f5', fontWeight: 800, fontSize: '15px' }}>Logo homepage</p>
+                  <p style={{ color: 'rgba(245,245,245,0.48)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>
                     Carica un'immagine quadrata o rotonda. Verrà mostrata sopra il titolo nella schermata iniziale.
                   </p>
 
@@ -1164,9 +1183,9 @@ export default function AdminPage() {
                       width: 'fit-content',
                       padding: '11px 16px',
                       borderRadius: '6px',
-                      border: '1px solid rgba(217,120,47,0.38)',
-                      background: 'rgba(217,120,47,0.1)',
-                      color: '#D9782F',
+                      border: '1px solid rgba(232,17,35,0.38)',
+                      background: 'rgba(232,17,35,0.1)',
+                      color: '#e81123',
                       cursor: uploadingFile ? 'not-allowed' : 'pointer',
                       fontWeight: 800,
                       fontSize: '13px',
@@ -1193,7 +1212,7 @@ export default function AdminPage() {
           {activeTab === 'products' && (
             <div>
               <div className="admin-section-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
-                <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '2px', color: '#F2E2C4' }}>
+                <h2 style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '2px', color: '#f5f5f5' }}>
                   GESTIONE PRODOTTI
                 </h2>
                 <motion.button
@@ -1206,10 +1225,10 @@ export default function AdminPage() {
                   style={{
                     display: 'flex', alignItems: 'center', gap: '8px',
                     padding: '10px 20px', borderRadius: '6px',
-                    border: '1px solid rgba(143,166,74,0.4)',
-                    background: 'rgba(143,166,74,0.1)',
-                    color: '#8FA64A', cursor: 'pointer', fontSize: '13px', fontWeight: 700,
-                    fontFamily: "'Poppins', sans-serif",
+                    border: '1px solid rgba(232,17,35,0.4)',
+                    background: 'rgba(232,17,35,0.1)',
+                    color: '#ff3347', cursor: 'pointer', fontSize: '13px', fontWeight: 700,
+                    fontFamily: "'Segoe UI', system-ui, sans-serif",
                   }}
                 >
                   <Plus size={15} />
@@ -1219,7 +1238,7 @@ export default function AdminPage() {
 
               {/* Search */}
               <div className="admin-search" style={{ position: 'relative', maxWidth: '380px', marginBottom: '20px' }}>
-                <Search size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(217,120,47,0.5)' }} />
+                <Search size={15} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(232,17,35,0.5)' }} />
                 <input
                   type="text"
                   placeholder="Cerca prodotto..."
@@ -1227,9 +1246,9 @@ export default function AdminPage() {
                   onChange={e => setSearch(e.target.value)}
                   style={{
                     width: '100%', padding: '10px 14px 10px 40px',
-                    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(217,120,47,0.2)',
-                    borderRadius: '6px', color: '#F2E2C4', fontSize: '13px', outline: 'none',
-                    fontFamily: "'Poppins', sans-serif", boxSizing: 'border-box',
+                    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(232,17,35,0.2)',
+                    borderRadius: '6px', color: '#f5f5f5', fontSize: '13px', outline: 'none',
+                    fontFamily: "'Segoe UI', system-ui, sans-serif", boxSizing: 'border-box',
                   }}
                 />
               </div>
@@ -1253,7 +1272,7 @@ export default function AdminPage() {
               {/* Product list */}
               <div className="admin-product-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {loadingProducts && (
-                  <div style={{ padding: '28px', color: 'rgba(242,226,196,0.45)', fontSize: '13px', textAlign: 'center' }}>
+                  <div style={{ padding: '28px', color: 'rgba(245,245,245,0.45)', fontSize: '13px', textAlign: 'center' }}>
                     Caricamento prodotti...
                   </div>
                 )}
@@ -1272,7 +1291,7 @@ export default function AdminPage() {
                       borderRadius: '8px', padding: '14px 18px',
                       transition: 'border-color 0.2s',
                     }}
-                    onHoverStart={e => ((e.target as HTMLElement).closest('[data-row]')?.setAttribute('style', 'border-color: rgba(217,120,47,0.2)'))}
+                    onHoverStart={e => ((e.target as HTMLElement).closest('[data-row]')?.setAttribute('style', 'border-color: rgba(232,17,35,0.2)'))}
                   >
                     {/* Image */}
                     <img
@@ -1284,32 +1303,32 @@ export default function AdminPage() {
                     {/* Info */}
                     <div className="admin-product-info" style={{ flex: 1, minWidth: 0 }}>
                       <div className="admin-product-title-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
-                        <p style={{ color: '#F2E2C4', fontWeight: 600, fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <p style={{ color: '#f5f5f5', fontWeight: 600, fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {p.name}
                         </p>
                         {p.badge && (
                           <span style={{
                             padding: '2px 8px', borderRadius: '8px', fontSize: '10px', fontWeight: 700,
                             ...(p.badge === 'FROZEN'
-                              ? { background: 'rgba(126,166,160,0.15)', color: '#7EA6A0' }
-                              : { background: 'rgba(217,120,47,0.15)', color: '#D9782F' }),
+                              ? { background: 'rgba(107,107,107,0.15)', color: '#6b6b6b' }
+                              : { background: 'rgba(232,17,35,0.15)', color: '#e81123' }),
                           }}>
                             {p.badge}
                           </span>
                         )}
                         {p.isNew && (
-                          <span style={{ padding: '2px 8px', borderRadius: '8px', fontSize: '10px', fontWeight: 700, background: 'rgba(143,166,74,0.12)', color: '#8FA64A' }}>NUOVO</span>
+                          <span style={{ padding: '2px 8px', borderRadius: '8px', fontSize: '10px', fontWeight: 700, background: 'rgba(232,17,35,0.12)', color: '#ff3347' }}>NUOVO</span>
                         )}
                       </div>
-                      <p style={{ color: 'rgba(242,226,196,0.4)', fontSize: '12px' }}>{p.brand} · {p.origin} · {p.weights.length} varianti</p>
+                      <p style={{ color: 'rgba(245,245,245,0.4)', fontSize: '12px' }}>{p.brand} · {p.origin} · {p.weights.length} varianti</p>
                     </div>
 
                     {/* Price range */}
                     <div className="admin-product-price" style={{ textAlign: 'right', flexShrink: 0 }}>
-                      <p style={{ color: '#D9782F', fontWeight: 700, fontSize: '14px' }}>
+                      <p style={{ color: '#e81123', fontWeight: 700, fontSize: '14px' }}>
                         €{(p.weights.find(w => w.price !== 'pvt')?.price as number) ?? '—'}+
                       </p>
-                      <p style={{ color: 'rgba(242,226,196,0.3)', fontSize: '11px' }}>{p.category}</p>
+                      <p style={{ color: 'rgba(245,245,245,0.3)', fontSize: '11px' }}>{p.category}</p>
                     </div>
 
                     {/* Actions */}
@@ -1318,8 +1337,8 @@ export default function AdminPage() {
                         onClick={() => handleEdit(p)}
                         style={{
                           padding: '7px', borderRadius: '9px', cursor: 'pointer',
-                          background: 'rgba(217,120,47,0.1)', border: '1px solid rgba(217,120,47,0.25)',
-                          color: '#D9782F', display: 'flex',
+                          background: 'rgba(232,17,35,0.1)', border: '1px solid rgba(232,17,35,0.25)',
+                          color: '#e81123', display: 'flex',
                         }}
                       >
                         <Edit3 size={14} />
@@ -1339,7 +1358,7 @@ export default function AdminPage() {
                 ))}
 
                 {!loadingProducts && filtered.length === 0 && (
-                  <div style={{ textAlign: 'center', padding: '60px', color: 'rgba(242,226,196,0.3)' }}>
+                  <div style={{ textAlign: 'center', padding: '60px', color: 'rgba(245,245,245,0.3)' }}>
                     <Package size={40} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
                     <p>Nessun prodotto trovato</p>
                   </div>
@@ -1352,10 +1371,10 @@ export default function AdminPage() {
             <div>
               <div className="admin-section-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
-                  <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '2px', color: '#F2E2C4', marginBottom: '6px' }}>
+                  <h2 style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '2px', color: '#f5f5f5', marginBottom: '6px' }}>
                     CONTATTI
                   </h2>
-                  <p style={{ color: 'rgba(242,226,196,0.42)', fontSize: '13px', margin: 0 }}>
+                  <p style={{ color: 'rgba(245,245,245,0.42)', fontSize: '13px', margin: 0 }}>
                     Modifica i tre canali mostrati nella pagina Contatti.
                   </p>
                 </div>
@@ -1368,9 +1387,9 @@ export default function AdminPage() {
                     gap: '8px',
                     padding: '10px 18px',
                     borderRadius: '6px',
-                    border: '1px solid rgba(143,166,74,0.4)',
-                    background: 'rgba(143,166,74,0.1)',
-                    color: '#8FA64A',
+                    border: '1px solid rgba(232,17,35,0.4)',
+                    background: 'rgba(232,17,35,0.1)',
+                    color: '#ff3347',
                     cursor: savingContacts ? 'not-allowed' : 'pointer',
                     fontSize: '13px',
                     fontWeight: 800,
@@ -1392,12 +1411,12 @@ export default function AdminPage() {
                 }}
               >
                 {([
-                  { name: 'whatsappGroupName', label: 'Nome gruppo WhatsApp', placeholder: 'LA FARM DEL GAS' },
+                  { name: 'whatsappGroupName', label: 'Nome gruppo WhatsApp', placeholder: 'TERPS DRAGON' },
                   { name: 'whatsappGroupUrl', label: 'Link gruppo WhatsApp', placeholder: 'https://chat.whatsapp.com/...' },
                   { name: 'whatsappContactLabel', label: 'Etichetta contatto WhatsApp', placeholder: '+39 333 000 0000' },
                   { name: 'whatsappContactUrl', label: 'Link contatto WhatsApp', placeholder: 'https://wa.me/393330000000' },
-                  { name: 'instagramLabel', label: 'Etichetta Instagram', placeholder: '@lafarmdelgas' },
-                  { name: 'instagramUrl', label: 'Link Instagram', placeholder: 'https://instagram.com/lafarmdelgas' },
+                  { name: 'instagramLabel', label: 'Etichetta Instagram', placeholder: '@terpsdragon' },
+                  { name: 'instagramUrl', label: 'Link Instagram', placeholder: 'https://instagram.com/terpsdragon' },
                 ] as Array<{ name: keyof ContactSettings; label: string; placeholder: string }>).map(field => (
                   <label
                     key={field.name}
@@ -1406,12 +1425,12 @@ export default function AdminPage() {
                       flexDirection: 'column',
                       gap: '8px',
                       background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(217,120,47,0.14)',
+                      border: '1px solid rgba(232,17,35,0.14)',
                       borderRadius: '8px',
                       padding: '14px',
                     }}
                   >
-                    <span style={{ color: 'rgba(242,226,196,0.54)', fontSize: '12px', fontWeight: 700 }}>
+                    <span style={{ color: 'rgba(245,245,245,0.54)', fontSize: '12px', fontWeight: 700 }}>
                       {field.label}
                     </span>
                     <input
@@ -1421,12 +1440,12 @@ export default function AdminPage() {
                       style={{
                         width: '100%',
                         padding: '11px 12px',
-                        background: 'rgba(9,6,4,0.5)',
-                        border: '1px solid rgba(242,226,196,0.09)',
+                        background: 'rgba(8,8,8,0.5)',
+                        border: '1px solid rgba(245,245,245,0.09)',
                         borderRadius: '6px',
-                        color: '#F2E2C4',
+                        color: '#f5f5f5',
                         outline: 'none',
-                        fontFamily: "'Poppins', sans-serif",
+                        fontFamily: "'Segoe UI', system-ui, sans-serif",
                         fontSize: '13px',
                         boxSizing: 'border-box',
                       }}
@@ -1441,9 +1460,9 @@ export default function AdminPage() {
                   maxWidth: '900px',
                   padding: '14px',
                   borderRadius: '8px',
-                  border: '1px solid rgba(123,74,136,0.16)',
-                  background: 'rgba(123,74,136,0.08)',
-                  color: 'rgba(242,226,196,0.45)',
+                  border: '1px solid rgba(255,51,71,0.16)',
+                  background: 'rgba(255,51,71,0.08)',
+                  color: 'rgba(245,245,245,0.45)',
                   fontSize: '12px',
                   lineHeight: 1.6,
                 }}
@@ -1453,10 +1472,159 @@ export default function AdminPage() {
             </div>
           )}
 
+          {activeTab === 'bot' && (
+            <div>
+              <div className="admin-section-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+                <div>
+                  <h2 style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '2px', color: '#f5f5f5', marginBottom: '6px' }}>
+                    TELEGRAM
+                  </h2>
+                  <p style={{ color: 'rgba(245,245,245,0.42)', fontSize: '13px', margin: 0 }}>
+                    Canale obbligatorio e link di iscrizione per il bot.
+                  </p>
+                </div>
+                <button
+                  onClick={handleSaveBotSettings}
+                  disabled={savingBotSettings}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 18px',
+                    borderRadius: '6px',
+                    border: '1px solid rgba(232,17,35,0.4)',
+                    background: 'rgba(232,17,35,0.1)',
+                    color: '#ff3347',
+                    cursor: savingBotSettings ? 'not-allowed' : 'pointer',
+                    fontSize: '13px',
+                    fontWeight: 800,
+                    opacity: savingBotSettings ? 0.65 : 1,
+                  }}
+                >
+                  <Save size={15} />
+                  {savingBotSettings ? 'Salvataggio...' : 'Salva Telegram'}
+                </button>
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                  gap: '14px',
+                  maxWidth: '900px',
+                }}
+              >
+                {([
+                  { name: 'requiredChat', label: 'Canale richiesto', placeholder: '-1001234567890 oppure @channel' },
+                  { name: 'joinUrl', label: 'Link iscrizione', placeholder: 'https://t.me/+invite privato' },
+                ] as Array<{ name: keyof Pick<BotSettings, 'requiredChat' | 'joinUrl'>; label: string; placeholder: string }>).map(field => (
+                  <label
+                    key={field.name}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(232,17,35,0.14)',
+                      borderRadius: '8px',
+                      padding: '14px',
+                    }}
+                  >
+                    <span style={{ color: 'rgba(245,245,245,0.54)', fontSize: '12px', fontWeight: 700 }}>
+                      {field.label}
+                    </span>
+                    <input
+                      value={botSettings[field.name]}
+                      onChange={e => setBotSettings(current => ({ ...current, [field.name]: e.target.value }))}
+                      placeholder={field.placeholder}
+                      style={{
+                        width: '100%',
+                        padding: '11px 12px',
+                        background: 'rgba(8,8,8,0.5)',
+                        border: '1px solid rgba(245,245,245,0.09)',
+                        borderRadius: '6px',
+                        color: '#f5f5f5',
+                        outline: 'none',
+                        fontFamily: "'Segoe UI', system-ui, sans-serif",
+                        fontSize: '13px',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </label>
+                ))}
+
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '14px',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(232,17,35,0.14)',
+                    borderRadius: '8px',
+                    padding: '14px',
+                  }}
+                >
+                  <span style={{ color: 'rgba(245,245,245,0.54)', fontSize: '12px', fontWeight: 700 }}>
+                    Richiedi iscrizione
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setBotSettings(current => ({ ...current, enabled: !current.enabled }))}
+                    style={{
+                      minWidth: '68px',
+                      height: '34px',
+                      borderRadius: '999px',
+                      border: `1px solid ${botSettings.enabled ? 'rgba(255,51,71,0.48)' : 'rgba(245,245,245,0.12)'}`,
+                      background: botSettings.enabled ? 'rgba(232,17,35,0.22)' : 'rgba(245,245,245,0.06)',
+                      color: botSettings.enabled ? '#ff3347' : 'rgba(245,245,245,0.42)',
+                      cursor: 'pointer',
+                      fontWeight: 800,
+                      fontSize: '12px',
+                    }}
+                  >
+                    {botSettings.enabled ? 'ON' : 'OFF'}
+                  </button>
+                </label>
+              </div>
+
+              <div
+                style={{
+                  marginTop: '18px',
+                  maxWidth: '900px',
+                  display: 'flex',
+                  gap: '10px',
+                  flexWrap: 'wrap',
+                }}
+              >
+                {[
+                  { label: 'BOT TOKEN', ok: botSettings.botConfigured },
+                  { label: 'WEBAPP URL', ok: botSettings.webAppConfigured },
+                ].map(item => (
+                  <span
+                    key={item.label}
+                    style={{
+                      padding: '7px 10px',
+                      borderRadius: '999px',
+                      border: `1px solid ${item.ok ? 'rgba(70,210,120,0.34)' : 'rgba(255,150,120,0.34)'}`,
+                      background: item.ok ? 'rgba(70,210,120,0.08)' : 'rgba(255,100,80,0.08)',
+                      color: item.ok ? 'rgba(150,255,190,0.86)' : 'rgba(255,190,170,0.9)',
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      letterSpacing: '1px',
+                    }}
+                  >
+                    {item.label}: {item.ok ? 'OK' : 'MISSING'}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {activeTab === 'categories' && (
             <div>
               <div className="admin-section-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
-                <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '2px', color: '#F2E2C4' }}>
+                <h2 style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '2px', color: '#f5f5f5' }}>
                   GESTIONE CATEGORIE
                 </h2>
               </div>
@@ -1478,11 +1646,11 @@ export default function AdminPage() {
                     flex: 1,
                     padding: '11px 14px',
                     background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(217,120,47,0.2)',
+                    border: '1px solid rgba(232,17,35,0.2)',
                     borderRadius: '6px',
-                    color: '#F2E2C4',
+                    color: '#f5f5f5',
                     outline: 'none',
-                    fontFamily: "'Poppins', sans-serif",
+                    fontFamily: "'Segoe UI', system-ui, sans-serif",
                   }}
                 />
                 <button
@@ -1494,9 +1662,9 @@ export default function AdminPage() {
                     gap: '8px',
                     padding: '10px 18px',
                     borderRadius: '6px',
-                    border: '1px solid rgba(143,166,74,0.4)',
-                    background: 'rgba(143,166,74,0.1)',
-                    color: '#8FA64A',
+                    border: '1px solid rgba(232,17,35,0.4)',
+                    background: 'rgba(232,17,35,0.1)',
+                    color: '#ff3347',
                     cursor: savingCategory ? 'not-allowed' : 'pointer',
                     fontSize: '13px',
                     fontWeight: 700,
@@ -1527,7 +1695,7 @@ export default function AdminPage() {
                         padding: '12px 14px',
                       }}
                     >
-                      <Tags size={16} color="#D9782F" />
+                      <Tags size={16} color="#e81123" />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         {editing ? (
                           <input
@@ -1537,17 +1705,17 @@ export default function AdminPage() {
                               width: '100%',
                               padding: '9px 12px',
                               background: 'rgba(255,255,255,0.04)',
-                              border: '1px solid rgba(217,120,47,0.28)',
+                              border: '1px solid rgba(232,17,35,0.28)',
                               borderRadius: '6px',
-                              color: '#F2E2C4',
+                              color: '#f5f5f5',
                               outline: 'none',
-                              fontFamily: "'Poppins', sans-serif",
+                              fontFamily: "'Segoe UI', system-ui, sans-serif",
                             }}
                           />
                         ) : (
                           <>
-                            <p style={{ color: '#F2E2C4', fontWeight: 700, fontSize: '14px' }}>{category}</p>
-                            <p style={{ color: 'rgba(242,226,196,0.38)', fontSize: '12px' }}>
+                            <p style={{ color: '#f5f5f5', fontWeight: 700, fontSize: '14px' }}>{category}</p>
+                            <p style={{ color: 'rgba(245,245,245,0.38)', fontSize: '12px' }}>
                               {productsCount} prodott{productsCount === 1 ? 'o' : 'i'}
                             </p>
                           </>
@@ -1563,9 +1731,9 @@ export default function AdminPage() {
                               padding: '8px',
                               borderRadius: '6px',
                               cursor: savingCategory ? 'not-allowed' : 'pointer',
-                              background: 'rgba(143,166,74,0.1)',
-                              border: '1px solid rgba(143,166,74,0.3)',
-                              color: '#8FA64A',
+                              background: 'rgba(232,17,35,0.1)',
+                              border: '1px solid rgba(232,17,35,0.3)',
+                              color: '#ff3347',
                               display: 'flex',
                             }}
                           >
@@ -1582,7 +1750,7 @@ export default function AdminPage() {
                               cursor: 'pointer',
                               background: 'rgba(255,255,255,0.04)',
                               border: '1px solid rgba(255,255,255,0.1)',
-                              color: 'rgba(242,226,196,0.62)',
+                              color: 'rgba(245,245,245,0.62)',
                               display: 'flex',
                             }}
                           >
@@ -1600,9 +1768,9 @@ export default function AdminPage() {
                               padding: '8px',
                               borderRadius: '6px',
                               cursor: 'pointer',
-                              background: 'rgba(217,120,47,0.1)',
-                              border: '1px solid rgba(217,120,47,0.25)',
-                              color: '#D9782F',
+                              background: 'rgba(232,17,35,0.1)',
+                              border: '1px solid rgba(232,17,35,0.25)',
+                              color: '#e81123',
                               display: 'flex',
                             }}
                           >
@@ -1632,7 +1800,7 @@ export default function AdminPage() {
                 })}
               </div>
 
-              <p style={{ color: 'rgba(242,226,196,0.38)', fontSize: '12px', marginTop: '18px', maxWidth: '720px' }}>
+              <p style={{ color: 'rgba(245,245,245,0.38)', fontSize: '12px', marginTop: '18px', maxWidth: '720px' }}>
                 "Tutti" non si modifica qui: resta un filtro automatico della vetrina.
               </p>
             </div>

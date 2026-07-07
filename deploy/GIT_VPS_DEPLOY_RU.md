@@ -355,6 +355,13 @@ nano .env
 ```env
 ADMIN_TOKEN=сюда-вставь-сгенерированный-токен
 LAFARM_HOST_PORT=49173
+TELEGRAM_BOT_TOKEN=токен-бота-из-BotFather
+TELEGRAM_WEBAPP_URL=https://lafarmdelgas.com
+TELEGRAM_ADMIN_IDS=telegram-id-админа
+BOT_REQUIRED_CHANNEL=-1001234567890
+BOT_JOIN_URL=https://t.me/+private_channel_invite
+BOT_REQUIRE_SUBSCRIPTION=true
+VITE_TELEGRAM_GATE=true
 ```
 
 Сохрани:
@@ -370,6 +377,7 @@ Ctrl + X
 - Логин админки: `admin`
 - Пароль админки: значение `ADMIN_TOKEN`
 - Если меняешь `ADMIN_TOKEN`, нужно пересобрать контейнеры через `docker compose up -d --build`.
+- Для проверки подписки бот должен быть админом закрытого канала. Для приватного канала укажи числовой chat id вида `-100...` в `BOT_REQUIRED_CHANNEL` и invite-link в `BOT_JOIN_URL`.
 
 ## 11. Подготовка папок данных
 

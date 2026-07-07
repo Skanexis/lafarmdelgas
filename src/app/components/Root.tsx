@@ -1,108 +1,49 @@
 import { Outlet, useLocation, Link, useNavigate } from 'react-router';
 import { Toaster } from 'sonner';
 import { ArrowLeft } from 'lucide-react';
+import { TelegramGate } from './TelegramGate';
 
 export default function Root() {
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = location.pathname === '/';
   const isAdmin = location.pathname.startsWith('/admin');
+  const telegramGateEnabled = ['true', '1', 'yes'].includes(
+    String(import.meta.env.VITE_TELEGRAM_GATE || '').toLowerCase(),
+  );
 
   return (
-    <div
-      style={{
-        fontFamily: "'Poppins', sans-serif",
-        background: 'linear-gradient(180deg, #090604 0%, #120C07 100%)',
-        minHeight: '100vh',
-        color: '#F2E2C4',
-      }}
-    >
-      {/* Floating Nav */}
+    <div className="app-shell">
       {!isHome && !isAdmin && (
-        <nav
-          className="app-nav"
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 50,
-            padding: '16px 24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            background: 'rgba(9,6,4,0.94)',
-            backdropFilter: 'blur(14px)',
-            borderBottom: '1px solid rgba(217,120,47,0.28)',
-          }}
-        >
-          <button
-            onClick={() => navigate(-1)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              background: 'rgba(217,120,47,0.1)',
-              border: '1px solid rgba(217,120,47,0.3)',
-              borderRadius: '8px',
-              padding: '8px 16px',
-              color: '#D9782F',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              fontSize: '14px',
-            }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLButtonElement).style.background = 'rgba(217,120,47,0.2)';
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLButtonElement).style.background = 'rgba(217,120,47,0.1)';
-            }}
-          >
-            <ArrowLeft size={16} />
-            Indietro
+        <nav className="app-nav">
+          <button className="app-nav-back" onClick={() => navigate(-1)} type="button" aria-label="Indietro">
+            <ArrowLeft size={17} />
+            <span>Indietro</span>
           </button>
 
-          <Link
-            className="app-nav-brand"
-            to="/"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              textDecoration: 'none',
-            }}
-          >
-            <span
-              style={{
-                background: 'linear-gradient(135deg, #F3C66A, #D9782F 48%, #8FA64A)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                fontFamily: "'Montserrat', sans-serif",
-                fontWeight: 800,
-                fontSize: '18px',
-                letterSpacing: '2px',
-              }}
-            >
-              LA FARM DEL GAS
-            </span>
+          <Link className="app-nav-brand" to="/">
+            TERPS DRAGON
           </Link>
 
-          <div className="app-nav-spacer" style={{ width: '96px' }} />
+          <div className="app-nav-spacer" />
         </nav>
       )}
 
-      <div style={{ paddingTop: isHome || isAdmin ? 0 : '73px' }}>
-        <Outlet />
-      </div>
+      <TelegramGate disabled={isAdmin || !telegramGateEnabled}>
+        <div style={{ paddingTop: isHome || isAdmin ? 0 : '66px' }}>
+          <Outlet />
+        </div>
+      </TelegramGate>
 
       <Toaster
         position="bottom-right"
         toastOptions={{
           style: {
-            background: 'rgba(18,12,7,0.97)',
-            border: '1px solid rgba(217,120,47,0.3)',
-            color: '#F2E2C4',
-            fontFamily: "'Poppins', sans-serif",
+            background: 'rgba(18, 18, 18, 0.96)',
+            border: '1px solid rgba(232, 17, 35, 0.32)',
+            color: '#f5f5f5',
+            fontFamily: "'Segoe UI', system-ui, sans-serif",
+            borderRadius: '8px',
           },
         }}
       />

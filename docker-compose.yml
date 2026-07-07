@@ -12,6 +12,12 @@ services:
       API_PORT: 8787
       ADMIN_TOKEN: ${ADMIN_TOKEN:?Set ADMIN_TOKEN in .env}
       UPLOAD_MAX_BYTES: ${UPLOAD_MAX_BYTES:-1073741824}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_WEBAPP_URL: ${TELEGRAM_WEBAPP_URL:-}
+      BOT_REQUIRED_CHANNEL: ${BOT_REQUIRED_CHANNEL:-}
+      BOT_REQUIRED_CHAT: ${BOT_REQUIRED_CHAT:-}
+      BOT_JOIN_URL: ${BOT_JOIN_URL:-}
+      BOT_REQUIRE_SUBSCRIPTION: ${BOT_REQUIRE_SUBSCRIPTION:-true}
     volumes:
       - ./server/data:/app/server/data
       - ./server/uploads:/app/server/uploads
@@ -24,6 +30,26 @@ services:
       start_period: 10s
       retries: 3
 
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: lafarmdelgas-bot
+    restart: unless-stopped
+    command: ["node", "server/bot.mjs"]
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:?Set TELEGRAM_BOT_TOKEN in .env}
+      TELEGRAM_WEBAPP_URL: ${TELEGRAM_WEBAPP_URL:?Set TELEGRAM_WEBAPP_URL in .env}
+      TELEGRAM_ADMIN_IDS: ${TELEGRAM_ADMIN_IDS:-}
+      BOT_REQUIRED_CHANNEL: ${BOT_REQUIRED_CHANNEL:-}
+      BOT_REQUIRED_CHAT: ${BOT_REQUIRED_CHAT:-}
+      BOT_JOIN_URL: ${BOT_JOIN_URL:-}
+      BOT_REQUIRE_SUBSCRIPTION: ${BOT_REQUIRE_SUBSCRIPTION:-true}
+    volumes:
+      - ./server/data:/app/server/data
+    networks:
+      - lafarmdelgas
+
   web:
     build:
       context: .
@@ -31,6 +57,7 @@ services:
       args:
         VITE_API_BASE_URL: /api
         VITE_ADMIN_PASS: ${ADMIN_TOKEN:?Set ADMIN_TOKEN in .env}
+        VITE_TELEGRAM_GATE: ${VITE_TELEGRAM_GATE:-false}
     container_name: lafarmdelgas-web
     restart: unless-stopped
     depends_on:

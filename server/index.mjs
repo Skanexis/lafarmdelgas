@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { once } from 'node:events';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { mkdir, readFile, readdir, stat, unlink, writeFile } from 'node:fs/promises';
 import { createReadStream, createWriteStream, existsSync } from 'node:fs';
 import { basename, dirname, extname, join, normalize } from 'node:path';
@@ -17,14 +18,21 @@ const messagesFile = join(dataDir, 'messages.json');
 const categoriesFile = join(dataDir, 'categories.json');
 const settingsFile = join(dataDir, 'settings.json');
 const contactsFile = join(dataDir, 'contacts.json');
+const botSettingsFile = join(dataDir, 'bot-settings.json');
 
 const defaultContacts = {
-  whatsappGroupName: 'LA FARM DEL GAS',
+  whatsappGroupName: 'TERPS DRAGON',
   whatsappGroupUrl: 'https://chat.whatsapp.com/',
   whatsappContactLabel: '+39 333 000 0000',
   whatsappContactUrl: 'https://wa.me/393330000000',
-  instagramLabel: '@lafarmdelgas',
-  instagramUrl: 'https://instagram.com/lafarmdelgas',
+  instagramLabel: '@terpsdragon',
+  instagramUrl: 'https://instagram.com/terpsdragon',
+};
+
+const defaultBotSettings = {
+  requiredChat: process.env.BOT_REQUIRED_CHANNEL || process.env.BOT_REQUIRED_CHAT || '',
+  joinUrl: process.env.BOT_JOIN_URL || '',
+  enabled: process.env.BOT_REQUIRE_SUBSCRIPTION !== 'false',
 };
 
 async function ensureDataFiles() {
@@ -53,6 +61,10 @@ async function ensureDataFiles() {
 
   if (!existsSync(contactsFile)) {
     await writeJson(contactsFile, defaultContacts);
+  }
+
+  if (!existsSync(botSettingsFile)) {
+    await writeJson(botSettingsFile, defaultBotSettings);
   }
 }
 
@@ -419,6 +431,115 @@ function normalizeContacts(input, current = defaultContacts) {
   };
 }
 
+function normalizeBotSettings(input, current = defaultBotSettings) {
+  return {
+    ...current,
+    requiredChat:
+      typeof input.requiredChat === 'string' ? input.requiredChat.trim() : current.requiredChat,
+    joinUrl: typeof input.joinUrl === 'string' ? input.joinUrl.trim() : current.joinUrl,
+    enabled: typeof input.enabled === 'boolean' ? input.enabled : current.enabled,
+  };
+}
+
+function getBotSettingsResponse(settings) {
+  return {
+    ...settings,
+    botConfigured: Boolean(process.env.TELEGRAM_BOT_TOKEN),
+    webAppConfigured: Boolean(process.env.TELEGRAM_WEBAPP_URL),
+  };
+}
+
+function validateTelegramInitData(initData) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) {
+    return { ok: false, error: 'Telegram bot token is not configured' };
+  }
+
+  const params = new URLSearchParams(String(initData || ''));
+  const hash = params.get('hash');
+
+  if (!hash) {
+    return { ok: false, error: 'Telegram init data hash is missing' };
+  }
+
+  params.delete('hash');
+
+  const dataCheckString = Array.from(params.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => `${key}=${value}`)
+    .join('\n');
+
+  const secret = createHmac('sha256', 'WebAppData').update(token).digest();
+  const calculated = createHmac('sha256', secret).update(dataCheckString).digest('hex');
+
+  const expectedBuffer = Buffer.from(hash, 'hex');
+  const calculatedBuffer = Buffer.from(calculated, 'hex');
+
+  if (
+    expectedBuffer.length !== calculatedBuffer.length ||
+    !timingSafeEqual(expectedBuffer, calculatedBuffer)
+  ) {
+    return { ok: false, error: 'Telegram init data hash is invalid' };
+  }
+
+  const authDate = Number(params.get('auth_date') || 0);
+  const maxAgeSeconds = Number(process.env.TELEGRAM_INIT_DATA_MAX_AGE || 86_400);
+
+  if (!authDate || Date.now() / 1000 - authDate > maxAgeSeconds) {
+    return { ok: false, error: 'Telegram init data is expired' };
+  }
+
+  let user = null;
+  try {
+    user = JSON.parse(params.get('user') || 'null');
+  } catch {
+    user = null;
+  }
+
+  if (!user?.id) {
+    return { ok: false, error: 'Telegram user is missing' };
+  }
+
+  return { ok: true, user };
+}
+
+async function isTelegramChatMember(userId, settings) {
+  if (!settings.enabled || !settings.requiredChat) {
+    return true;
+  }
+
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) {
+    return false;
+  }
+
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${token}/getChatMember`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: settings.requiredChat,
+        user_id: userId,
+      }),
+    });
+
+    const payload = await response.json();
+    const member = payload?.result;
+
+    if (!payload?.ok || !member) {
+      return false;
+    }
+
+    if (member.status === 'restricted') {
+      return Boolean(member.is_member);
+    }
+
+    return ['creator', 'administrator', 'member'].includes(member.status);
+  } catch {
+    return false;
+  }
+}
+
 async function handleRequest(req, res) {
   const url = new URL(req.url || '/', `http://${req.headers.host}`);
   const path = url.pathname;
@@ -468,6 +589,33 @@ async function handleRequest(req, res) {
   if (path === '/api/contacts' && method === 'GET') {
     const contacts = await readJson(contactsFile, defaultContacts);
     sendJson(res, 200, normalizeContacts(contacts));
+    return;
+  }
+
+  if (path === '/api/telegram/session' && method === 'POST') {
+    const body = await parseBody(req);
+    const validated = validateTelegramInitData(body.initData);
+
+    if (!validated.ok) {
+      sendJson(res, 401, { error: validated.error });
+      return;
+    }
+
+    const settings = normalizeBotSettings(await readJson(botSettingsFile, defaultBotSettings));
+    const subscribed = await isTelegramChatMember(validated.user.id, settings);
+
+    if (!subscribed) {
+      sendJson(res, 403, {
+        error: 'Subscription required',
+        joinUrl: settings.joinUrl,
+      });
+      return;
+    }
+
+    sendJson(res, 200, {
+      ok: true,
+      user: validated.user,
+    });
     return;
   }
 
@@ -639,6 +787,31 @@ async function handleRequest(req, res) {
     return;
   }
 
+  if (path === '/api/admin/bot-settings' && method === 'GET') {
+    if (!isAuthorized(req)) {
+      sendJson(res, 401, { error: 'Unauthorized' });
+      return;
+    }
+
+    const settings = normalizeBotSettings(await readJson(botSettingsFile, defaultBotSettings));
+    sendJson(res, 200, getBotSettingsResponse(settings));
+    return;
+  }
+
+  if (path === '/api/admin/bot-settings' && method === 'PUT') {
+    if (!isAuthorized(req)) {
+      sendJson(res, 401, { error: 'Unauthorized' });
+      return;
+    }
+
+    const current = normalizeBotSettings(await readJson(botSettingsFile, defaultBotSettings));
+    const settings = normalizeBotSettings(await parseBody(req), current);
+
+    await writeJson(botSettingsFile, settings);
+    sendJson(res, 200, getBotSettingsResponse(settings));
+    return;
+  }
+
   if (path === '/api/admin/categories' && method === 'POST') {
     if (!isAuthorized(req)) {
       sendJson(res, 401, { error: 'Unauthorized' });
@@ -769,5 +942,5 @@ http
     });
   })
   .listen(port, host, () => {
-    console.log(`LA FARM DEL GAS API listening on http://${host}:${port}`);
+    console.log(`TERPS DRAGON API listening on http://${host}:${port}`);
   });

@@ -2,7 +2,7 @@ export const seedProducts = [
   {
     id: '1',
     name: 'MAROCCO DRY GOLD',
-    brand: 'LA FARM DEL GAS Selection',
+    brand: 'TERPS DRAGON Selection',
     origin: 'Marocco',
     description:
       'Una selezione premium proveniente direttamente dalle montagne del Marocco. Caratterizzata da un aroma intenso e terroso con note dolci, questa varietà è la scelta ideale per gli intenditori più esigenti. La coltivazione artigianale garantisce una qualità superiore rispetto ai prodotti industriali. Ogni lotto è selezionato manualmente dai nostri esperti sul posto.',
@@ -26,7 +26,7 @@ export const seedProducts = [
   {
     id: '2',
     name: 'FROZEN CRYSTAL ICE',
-    brand: 'LA FARM DEL GAS Frozen',
+    brand: 'TERPS DRAGON Frozen',
     origin: 'Olanda',
     description:
       'Un prodotto unico nella sua categoria: congelato immediatamente dopo la raccolta per preservare tutti gli aromi e le proprietà originali. La tecnica del freeze-drying garantisce una conservazione ottimale della qualità. I cristalli di terpeni sono perfettamente intatti. Ogni grammo è un\'esperienza sensoriale unica e irripetibile.',
@@ -48,11 +48,11 @@ export const seedProducts = [
   },
   {
     id: '3',
-    name: 'MAROCCO LA FARM SELECT',
-    brand: 'LA FARM DEL GAS Exclusive',
+    name: 'MAROCCO DRAGON SELECT',
+    brand: 'TERPS DRAGON Exclusive',
     origin: 'Marocco',
     description:
-      'La selezione firmata LA FARM DEL GAS dal Marocco. Coltivata nelle fertili valli dell\'Atlante con metodi tradizionali trasmessi di generazione in generazione. Il profumo speziato e la consistenza compatta la rendono inconfondibile. Produzione limitata e certificata. Solo per i clienti più selezionati.',
+      'La selezione firmata TERPS DRAGON dal Marocco. Coltivata nelle fertili valli dell\'Atlante con metodi tradizionali trasmessi di generazione in generazione. Il profumo speziato e la consistenza compatta la rendono inconfondibile. Produzione limitata e certificata. Solo per i clienti più selezionati.',
     images: [
       'https://images.unsplash.com/photo-1707647824867-271e33ce703c?w=800&q=80',
       'https://images.unsplash.com/photo-1707914273132-25532bc233cd?w=800&q=80',
@@ -73,7 +73,7 @@ export const seedProducts = [
   {
     id: '4',
     name: 'FROZEN PURPLE HAZE',
-    brand: 'LA FARM DEL GAS Haze',
+    brand: 'TERPS DRAGON Haze',
     origin: 'Spagna',
     description:
       'Una varieta rara proveniente dalla Spagna, congelata al picco della maturazione. Le note floreali e fruttate si combinano con una potenza superiore alla media. Il colore viola intenso dei cristalli e il marchio di riconoscimento di questa varieta esclusiva. Disponibilita molto limitata.',
@@ -95,7 +95,7 @@ export const seedProducts = [
   {
     id: '5',
     name: 'MAROCCO BLACK LABEL',
-    brand: 'LA FARM DEL GAS Black Label',
+    brand: 'TERPS DRAGON Black Label',
     origin: 'Marocco',
     description:
       'Il mitico hash nero marocchino, prodotto con tecniche ancestrali. La pressatura manuale a caldo conferisce una consistenza morbida e un aroma inconfondibile di spezie orientali. Una delle selezioni piu richieste dai nostri clienti piu fedeli. Disponibile in quantita limitate stagionalmente.',
@@ -118,7 +118,7 @@ export const seedProducts = [
   {
     id: '6',
     name: 'SUPREME FROZEN OG',
-    brand: 'LA FARM DEL GAS OG Frozen',
+    brand: 'TERPS DRAGON OG Frozen',
     origin: 'USA',
     description:
       'L\'OG Kush nelle sue varianti migliori, subito congelate e spedite in Italia. Il profumo agrumato e terroso e inconfondibile. Cristalli abbondanti e una qualita che non delude mai. Per i veri intenditori che non accettano compromessi sulla qualita assoluta.',

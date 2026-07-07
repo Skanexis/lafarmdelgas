@@ -3,10 +3,12 @@ import { AnimatePresence, motion } from 'motion/react';
 import {
   ChevronLeft,
   ChevronRight,
+  Check,
   MessageCircle,
   Play,
   Snowflake,
   Star,
+  Tag,
   MapPin,
   ZoomIn,
   X,
@@ -57,18 +59,7 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 900,
-          background:
-            'radial-gradient(circle at 50% 18%, rgba(57,255,20,0.16), transparent 34%), radial-gradient(circle at 78% 72%, rgba(244,201,93,0.12), transparent 30%), rgba(2,4,3,0.84)',
-          backdropFilter: 'blur(10px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '24px',
-        }}
+        className="product-detail-overlay"
       >
         <motion.article
           initial={{ opacity: 0, y: 24, scale: 0.96 }}
@@ -77,18 +68,8 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
           transition={{ duration: 0.22 }}
           onClick={event => event.stopPropagation()}
           className="product-detail-modal"
-          style={{
-            width: 'clamp(340px, 30vw, 480px)',
-            maxHeight: '86vh',
-            overflowY: 'auto',
-            background:
-              'linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025) 34%, rgba(2,4,3,0.98)), #050705',
-            border: '1px solid rgba(57,255,20,0.28)',
-            borderRadius: '10px',
-            boxShadow: '0 0 44px rgba(57,255,20,0.14), 0 28px 84px rgba(0,0,0,0.72)',
-          }}
         >
-          <div style={{ position: 'relative', aspectRatio: '4/3', overflow: 'hidden', borderRadius: '10px 10px 0 0', background: '#020403' }}>
+          <div className="product-detail-hero">
             <AnimatePresence mode="wait">
               {activeMedia?.type === 'video' ? (
                 <motion.video
@@ -101,7 +82,7 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
                   controls
                   playsInline
                   preload="metadata"
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#020403', display: 'block' }}
+                  className="product-detail-media"
                 />
               ) : (
                 <motion.img
@@ -113,171 +94,79 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
                   src={activeMedia?.url}
                   alt={product.name}
                   decoding="async"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  className="product-detail-media"
                 />
               )}
             </AnimatePresence>
 
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'linear-gradient(to top, rgba(9,6,4,0.82) 0%, transparent 56%)',
-                pointerEvents: 'none',
-              }}
-            />
+            <div className="product-detail-hero-overlay" />
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
               onClick={onClose}
               aria-label="Chiudi dettaglio"
-              style={{
-                position: 'absolute',
-                top: '12px',
-                right: '12px',
-                width: '34px',
-                height: '34px',
-                borderRadius: '6px',
-                border: '1px solid rgba(255,255,255,0.16)',
-                background: 'rgba(9,6,4,0.72)',
-                color: '#F2E2C4',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-              }}
+              className="product-detail-close"
             >
               <X size={17} />
-            </button>
+            </motion.button>
 
             {product.badge && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '12px',
-                  left: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  padding: '5px 11px',
-                  borderRadius: '4px',
-                  fontSize: '10px',
-                  fontWeight: 800,
-                  letterSpacing: '1.2px',
-                  textShadow: '0 1px 2px rgba(0,0,0,0.7)',
-                  ...(product.badge === 'FROZEN'
-                    ? {
-                        background: 'rgba(12,24,22,0.88)',
-                        border: '1px solid rgba(126,166,160,0.58)',
-                        color: '#d8fffb',
-                      }
-                    : {
-                        background: 'rgba(34,27,11,0.9)',
-                        border: '1px solid rgba(244,201,93,0.6)',
-                        color: '#fff1a8',
-                      }),
-                }}
-              >
+              <div className={`product-detail-badge ${product.badge === 'FROZEN' ? 'frozen' : 'standard'}`}>
                 {product.badge === 'FROZEN' ? <Snowflake size={11} /> : <Star size={11} />}
                 {product.badge}
               </div>
             )}
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => {
                 setGalleryStart(activeImage);
                 setGalleryOpen(true);
               }}
-              style={{
-                position: 'absolute',
-                bottom: '12px',
-                right: '12px',
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: 'rgba(9,6,4,0.72)',
-                borderRadius: '6px',
-                padding: '7px 10px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                color: 'rgba(242,226,196,0.72)',
-                fontSize: '11px',
-                cursor: 'zoom-in',
-              }}
+              className="product-detail-zoom"
+              aria-label="Zoom"
             >
               <ZoomIn size={13} />
-              Zoom
-            </button>
+            </motion.button>
 
             {activeImage > 0 && (
-              <button
+              <motion.button
+                className="product-detail-nav-button prev"
                 onClick={() => setActiveImage(i => i - 1)}
                 aria-label="Media precedente"
-                style={{
-                  position: 'absolute',
-                  left: '10px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'rgba(9,6,4,0.7)',
-                  border: '1px solid rgba(57,255,20,0.28)',
-                  borderRadius: '6px',
-                  width: '34px',
-                  height: '34px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  color: '#d9ffd2',
-                }}
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 22 }}
               >
                 <ChevronLeft size={18} />
-              </button>
+              </motion.button>
             )}
 
             {activeImage < productMedia.length - 1 && (
-              <button
+              <motion.button
+                className="product-detail-nav-button next"
                 onClick={() => setActiveImage(i => i + 1)}
                 aria-label="Media successivo"
-                style={{
-                  position: 'absolute',
-                  right: '10px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'rgba(9,6,4,0.7)',
-                  border: '1px solid rgba(57,255,20,0.28)',
-                  borderRadius: '6px',
-                  width: '34px',
-                  height: '34px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  color: '#d9ffd2',
-                }}
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 22 }}
               >
                 <ChevronRight size={18} />
-              </button>
+              </motion.button>
             )}
           </div>
 
-          <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div className="product-detail-body">
             {productMedia.length > 1 && (
-              <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '2px' }}>
+              <div className="product-detail-thumb-row">
                 {productMedia.map((item, i) => (
                   <button
-                    key={`${item.type}-${item.url}`}
-                    onClick={() => setActiveImage(i)}
-                    style={{
-                      position: 'relative',
-                      flexShrink: 0,
-                      width: '56px',
-                      height: '42px',
-                      borderRadius: '6px',
-                      overflow: 'hidden',
-                      padding: 0,
-                      border: i === activeImage ? '2px solid #39ff14' : '2px solid rgba(255,255,255,0.1)',
-                      opacity: i === activeImage ? 1 : 0.58,
-                      cursor: 'pointer',
-                    }}
-                  >
+                  key={`${item.type}-${item.url}`}
+                  onClick={() => setActiveImage(i)}
+                  className={`product-detail-thumb ${i === activeImage ? 'active' : ''}`}
+                >
                     {item.type === 'video' ? (
                       <>
                         <video
@@ -285,29 +174,19 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
                           muted
                           playsInline
                           preload="metadata"
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', background: '#090604' }}
+                          className="product-detail-thumb-media"
                         />
-                        <span
-                          style={{
-                            position: 'absolute',
-                            inset: 0,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            background: 'rgba(0,0,0,0.32)',
-                            color: '#39ff14',
-                          }}
-                        >
+                        <span className="product-detail-thumb-play">
                           <Play size={13} fill="currentColor" />
                         </span>
                       </>
                     ) : (
                       <img
+                        className="product-detail-thumb-media"
                         src={item.url}
                         alt={`Thumb ${i + 1}`}
                         loading="lazy"
                         decoding="async"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                     )}
                   </button>
@@ -315,145 +194,57 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
               </div>
             )}
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '7px', minWidth: 0 }}>
-              <MapPin size={13} color="#d9ffd2" />
-              <span style={{ color: '#d9ffd2', fontSize: '11px', letterSpacing: '1.8px', textTransform: 'uppercase' }}>
-                {product.origin}
-              </span>
-              {product.isNew && (
-                <span
-                  style={{
-                    marginLeft: 'auto',
-                    padding: '3px 8px',
-                    borderRadius: '4px',
-                    background: 'rgba(8,28,10,0.88)',
-                    border: '1px solid rgba(57,255,20,0.42)',
-                    color: '#d9ffd2',
-                    fontSize: '9px',
-                    fontWeight: 800,
-                    letterSpacing: '1px',
-                  }}
-                >
-                  NUOVO
-                </span>
-              )}
+            <div className="product-detail-meta">
+              <MapPin size={13} />
+              <span className="product-detail-origin">{product.origin}</span>
+              {product.isNew && <span className="product-detail-new-chip">New</span>}
             </div>
 
             <div>
-              <h2
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontWeight: 900,
-                  fontSize: '24px',
-                  letterSpacing: '1.4px',
-                  lineHeight: 1.1,
-                  color: '#F2E2C4',
-                  marginBottom: '5px',
-                }}
-              >
+              <h2 className="product-detail-title">
                 {product.name}
               </h2>
-              <p style={{ color: 'rgba(242,226,196,0.45)', fontSize: '12px' }}>{product.brand}</p>
+              <p className="product-detail-brand">{product.brand}</p>
             </div>
 
-            <p
-              style={{
-                color: 'rgba(242,226,196,0.64)',
-                lineHeight: 1.65,
-                fontSize: '12px',
-                padding: '12px',
-                background: 'rgba(255,255,255,0.035)',
-                borderRadius: '6px',
-                border: '1px solid rgba(255,255,255,0.07)',
-                margin: 0,
-              }}
-            >
+            <p className="product-detail-description">
               {product.description}
             </p>
 
             <div>
-              <p
-                style={{
-                  color: 'rgba(217,255,210,0.76)',
-                  fontSize: '10px',
-                  letterSpacing: '2.4px',
-                  textTransform: 'uppercase',
-                  marginBottom: '9px',
-                }}
-              >
-                Prezzi per grammatura
+              <p className="product-detail-price-label">
+                Tagli
               </p>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                  gap: '8px',
-                }}
-              >
+              <div className="product-detail-weight-grid">
                 {product.weights.map(weight => {
                   const selected = selectedWeight.weight === weight.weight;
                   return (
                     <button
                       key={weight.weight}
                       onClick={() => setSelectedWeight(weight)}
-                      style={{
-                        border: selected ? '1px solid rgba(57,255,20,0.5)' : '1px solid rgba(255,255,255,0.08)',
-                        background: selected ? 'rgba(57,255,20,0.12)' : 'rgba(255,255,255,0.035)',
-                        borderRadius: '6px',
-                        padding: '10px',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                      }}
+                      className={`product-detail-weight-button ${selected ? 'selected' : ''}`}
+                      type="button"
                     >
-                      <span
-                        style={{
-                          display: 'block',
-                          color: selected ? '#d9ffd2' : '#F2E2C4',
-                          fontSize: '13px',
-                          fontWeight: 800,
-                        }}
-                      >
-                        {weight.weight}
-                      </span>
-                      <span
-                        style={{
-                          color: weight.price === 'pvt' ? '#7B4A88' : 'rgba(242,226,196,0.58)',
-                          fontSize: '12px',
-                          fontWeight: 700,
-                        }}
-                      >
-                        {weight.price === 'pvt' ? 'In pvt' : `€${weight.price}`}
-                      </span>
+                      <div>
+                        <span className="product-detail-weight-name">
+                          {weight.weight}
+                        </span>
+                        <span className="product-detail-weight-price">
+                          {weight.price === 'pvt' ? 'In pvt' : `€${weight.price}`}
+                        </span>
+                      </div>
+                      {selected && <Check size={14} className="product-detail-weight-selected-icon" />}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            <div
-              style={{
-                padding: '14px',
-                background: 'rgba(57,255,20,0.06)',
-                border: '1px solid rgba(57,255,20,0.2)',
-                borderRadius: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '12px',
-              }}
-            >
-              <span style={{ color: 'rgba(242,226,196,0.58)', fontSize: '12px' }}>Prezzo ({selectedWeight.weight})</span>
-              <span
-                style={{
-                  fontFamily: "'Montserrat', sans-serif",
-                  fontWeight: 900,
-                  fontSize: '22px',
-                  background: 'linear-gradient(135deg, #39ff14, #b7ff4a 52%, #f4f4ef)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+            <div className="product-detail-price-summary">
+              <span className="product-detail-price-note">
+                <Tag size={14} /> {selectedWeight.weight}
+              </span>
+              <span className="product-detail-price-highlight">
                 {selectedWeight.price === 'pvt' ? 'Su richiesta' : `€${selectedWeight.price}`}
               </span>
             </div>
@@ -462,26 +253,10 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
               whileHover={{ scale: 1.015, y: -1 }}
               whileTap={{ scale: 0.98 }}
               onClick={onContact}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '10px',
-                padding: '14px',
-                borderRadius: '6px',
-                background: 'linear-gradient(135deg, #39ff14, #b7ff4a 58%, #e7ffd7)',
-                border: '1px solid rgba(255,255,255,0.18)',
-                color: '#020403',
-                cursor: 'pointer',
-                fontFamily: "'Montserrat', sans-serif",
-                fontWeight: 800,
-                fontSize: '13px',
-                letterSpacing: '1.5px',
-                boxShadow: '0 10px 24px rgba(0,0,0,0.22)',
-              }}
+              className="product-detail-contact-button"
             >
               <MessageCircle size={17} />
-              RICHIEDI INFORMAZIONI
+              Info
             </motion.button>
           </div>
         </motion.article>
@@ -495,9 +270,100 @@ export function ProductDetailModal({ product, onClose, onContact }: ProductDetai
 
       <style>{`
         @media (max-width: 720px) {
+          .product-detail-overlay {
+            align-items: flex-end !important;
+            padding: 0 10px max(10px, env(safe-area-inset-bottom)) !important;
+          }
+
           .product-detail-modal {
-            width: calc(100vw - 28px) !important;
-            max-height: 90vh !important;
+            width: min(520px, calc(100vw - 20px)) !important;
+            max-height: min(92svh, 760px) !important;
+            border-radius: 8px 8px 0 0 !important;
+          }
+
+          .product-detail-hero {
+            max-height: 42svh !important;
+          }
+
+          .product-detail-body {
+            padding: 14px !important;
+            gap: 12px !important;
+          }
+
+          .product-detail-title {
+            font-size: 23px !important;
+            letter-spacing: 0.4px !important;
+            overflow-wrap: anywhere !important;
+          }
+
+          .product-detail-description {
+            font-size: 12px !important;
+            line-height: 1.55 !important;
+          }
+
+          .product-detail-meta {
+            flex-wrap: wrap !important;
+          }
+
+          .product-detail-new-chip {
+            margin-left: 0 !important;
+          }
+
+          .product-detail-contact-button {
+            min-height: 48px !important;
+            text-align: center !important;
+            line-height: 1.2 !important;
+          }
+        }
+
+        @media (max-width: 420px) {
+          .product-detail-overlay {
+            padding: 0 !important;
+          }
+
+          .product-detail-modal {
+            width: 100vw !important;
+            max-height: 94svh !important;
+            border-radius: 8px 8px 0 0 !important;
+            border-left: 0 !important;
+            border-right: 0 !important;
+            border-bottom: 0 !important;
+          }
+
+          .product-detail-hero {
+            aspect-ratio: 1.12 !important;
+            max-height: 38svh !important;
+          }
+
+          .product-detail-close,
+          .product-detail-nav-button {
+            width: 38px !important;
+            height: 38px !important;
+          }
+
+          .product-detail-thumb {
+            width: 62px !important;
+            height: 46px !important;
+          }
+
+          .product-detail-price-summary {
+            align-items: flex-start !important;
+          }
+        }
+
+        @media (max-width: 360px) {
+          .product-detail-weight-grid {
+            grid-template-columns: 1fr !important;
+          }
+
+          .product-detail-price-summary {
+            flex-direction: column !important;
+            gap: 8px !important;
+          }
+
+          .product-detail-contact-button {
+            font-size: 12px !important;
+            letter-spacing: 0.8px !important;
           }
         }
       `}</style>
