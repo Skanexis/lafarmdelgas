@@ -157,7 +157,7 @@ async function handleCallback(callback) {
     const subscribed = await isSubscribed(userId);
     await callTelegram('answerCallbackQuery', {
       callback_query_id: callback.id,
-      text: subscribed ? 'Доступ открыт' : 'Подписка не найдена',
+      text: subscribed ? 'Accesso aperto' : 'Iscrizione non trovata',
       show_alert: false,
     });
 
@@ -183,14 +183,14 @@ async function sendSubscriptionGate(chatId) {
   const keyboard = [];
 
   if (settings.joinUrl) {
-    keyboard.push([{ text: 'Подписаться', url: settings.joinUrl }]);
+    keyboard.push([{ text: 'Iscriviti', url: settings.joinUrl }]);
   }
 
-  keyboard.push([{ text: 'Проверить', callback_data: 'check_subscription' }]);
+  keyboard.push([{ text: 'Verifica', callback_data: 'check_subscription' }]);
 
   await callTelegram('sendMessage', {
     chat_id: chatId,
-    text: 'Сначала подпишись на канал.',
+    text: 'Prima iscriviti al canale.',
     reply_markup: {
       inline_keyboard: keyboard,
     },
@@ -200,12 +200,12 @@ async function sendSubscriptionGate(chatId) {
 async function sendMiniApp(chatId) {
   await callTelegram('sendMessage', {
     chat_id: chatId,
-    text: 'Доступ открыт.',
+    text: 'Accesso aperto.',
     reply_markup: {
       inline_keyboard: [
         [
           {
-            text: 'Открыть',
+            text: 'Apri',
             web_app: { url: webAppUrl },
           },
         ],
@@ -252,7 +252,7 @@ async function handleAdminSetChannel(message, text) {
   if (!requiredChat) {
     await callTelegram('sendMessage', {
       chat_id: message.chat.id,
-      text: 'Формат: /setchannel -1001234567890 или @channel_username',
+      text: 'Formato: /setchannel -1001234567890 oppure @channel_username',
     });
     return;
   }
@@ -260,7 +260,7 @@ async function handleAdminSetChannel(message, text) {
   const settings = await saveSettings({ requiredChat, enabled: true });
   await callTelegram('sendMessage', {
     chat_id: message.chat.id,
-    text: `Канал: ${settings.requiredChat}`,
+    text: `Canale: ${settings.requiredChat}`,
   });
 }
 
@@ -271,7 +271,7 @@ async function handleAdminSetInvite(message, text) {
   if (!joinUrl) {
     await callTelegram('sendMessage', {
       chat_id: message.chat.id,
-      text: 'Формат: /setinvite https://t.me/+invite',
+      text: 'Formato: /setinvite https://t.me/+invite',
     });
     return;
   }
