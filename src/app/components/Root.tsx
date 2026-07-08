@@ -11,6 +11,11 @@ export default function Root() {
   const telegramGateEnabled = ['true', '1', 'yes'].includes(
     String(import.meta.env.VITE_TELEGRAM_GATE || '').toLowerCase(),
   );
+  const pageContent = (
+    <div style={{ paddingTop: isHome || isAdmin ? 0 : '66px' }}>
+      <Outlet />
+    </div>
+  );
 
   return (
     <div className="app-shell">
@@ -29,11 +34,7 @@ export default function Root() {
         </nav>
       )}
 
-      <TelegramGate disabled={isAdmin || !telegramGateEnabled}>
-        <div style={{ paddingTop: isHome || isAdmin ? 0 : '66px' }}>
-          <Outlet />
-        </div>
-      </TelegramGate>
+      {isAdmin || !telegramGateEnabled ? pageContent : <TelegramGate>{pageContent}</TelegramGate>}
 
       <Toaster
         position="bottom-right"
