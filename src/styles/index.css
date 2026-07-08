@@ -1401,6 +1401,118 @@ button {
   box-sizing: border-box;
 }
 
+@media (max-width: 760px) {
+  .admin-topbar {
+    top: 0 !important;
+    height: 52px !important;
+    padding: 0 12px !important;
+  }
+
+  .admin-topbar span {
+    font-size: 12px !important;
+    letter-spacing: 1px !important;
+  }
+
+  .admin-layout {
+    flex-direction: column !important;
+  }
+
+  .admin-sidebar {
+    width: 100% !important;
+    position: sticky !important;
+    top: 52px !important;
+    z-index: 35 !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 14px !important;
+    overflow-x: auto !important;
+    padding: 8px 12px !important;
+    background: rgba(5, 5, 5, 0.92) !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .admin-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-sidebar-button {
+    width: auto !important;
+    flex: 0 0 auto !important;
+    gap: 0 !important;
+    padding: 6px 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+    letter-spacing: 0 !important;
+  }
+
+  .admin-sidebar-button svg {
+    display: none !important;
+  }
+
+  .admin-stats {
+    display: none !important;
+  }
+
+  .admin-main {
+    padding: 14px 12px 28px !important;
+    overflow: visible !important;
+  }
+
+  .admin-section-head {
+    margin-bottom: 16px !important;
+  }
+
+  .admin-section-head h2 {
+    font-size: 17px !important;
+    letter-spacing: 1px !important;
+  }
+
+  .admin-brand-grid,
+  .admin-contacts-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .admin-product-row {
+    align-items: flex-start !important;
+    gap: 10px !important;
+    padding: 10px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .admin-product-row img {
+    width: 48px !important;
+    height: 38px !important;
+  }
+
+  .admin-product-info {
+    flex: 1 1 calc(100% - 64px) !important;
+  }
+
+  .admin-product-title-row {
+    flex-wrap: wrap !important;
+  }
+
+  .admin-product-price {
+    flex: 1 1 auto !important;
+    text-align: left !important;
+  }
+
+  .admin-product-actions {
+    margin-left: auto !important;
+  }
+
+  .admin-category-create {
+    max-width: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
