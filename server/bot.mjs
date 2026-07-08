@@ -21,6 +21,7 @@ const defaultSettings = {
   joinUrl: process.env.BOT_JOIN_URL || '',
   enabled: process.env.BOT_REQUIRE_SUBSCRIPTION !== 'false',
 };
+const subscriptionCheckEnabled = false;
 
 if (!token) {
   throw new Error('TELEGRAM_BOT_TOKEN is required');
@@ -153,11 +154,11 @@ async function handleCallback(callback) {
   const chatId = callback.message?.chat?.id;
   const userId = callback.from?.id;
 
-  if (callback.data === 'check_subscription' && chatId && userId) {
-    const subscribed = await isSubscribed(userId);
+  if (callback.data === 'check_subscription' && chatId) {
+    const subscribed = !subscriptionCheckEnabled || (userId && await isSubscribed(userId));
     await callTelegram('answerCallbackQuery', {
       callback_query_id: callback.id,
-      text: subscribed ? 'Accesso aperto' : 'Iscrizione non trovata',
+      text: 'Accesso aperto',
       show_alert: false,
     });
 
@@ -170,7 +171,7 @@ async function handleCallback(callback) {
 }
 
 async function sendStart(chatId, userId) {
-  if (await isSubscribed(userId)) {
+  if (!subscriptionCheckEnabled || await isSubscribed(userId)) {
     await sendMiniApp(chatId);
     return;
   }

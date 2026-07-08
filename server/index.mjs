@@ -34,6 +34,7 @@ const defaultBotSettings = {
   joinUrl: process.env.BOT_JOIN_URL || '',
   enabled: process.env.BOT_REQUIRE_SUBSCRIPTION !== 'false',
 };
+const subscriptionCheckEnabled = false;
 
 async function ensureDataFiles() {
   await mkdir(dataDir, { recursive: true });
@@ -504,6 +505,10 @@ function validateTelegramInitData(initData) {
 }
 
 async function isTelegramChatMember(userId, settings) {
+  if (!subscriptionCheckEnabled) {
+    return true;
+  }
+
   if (!settings.enabled || !settings.requiredChat) {
     return true;
   }
